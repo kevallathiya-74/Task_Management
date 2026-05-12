@@ -7,7 +7,8 @@ class AuthController
     public function showLogin()
     {
         if (isset($_SESSION['user_id'])) {
-            header('Location: ' . url('/dashboard'));
+            $prefix = ($_SESSION['user_role'] === 'admin') ? 'admin' : 'staff';
+            header('Location: ' . url("/$prefix/dashboard"));
             exit;
         }
         
@@ -44,10 +45,11 @@ class AuthController
             
             $userModel->updateLastLogin($user['id']);
 
+            $prefix = ($user['role_slug'] === 'admin') ? 'admin' : 'staff';
             echo json_encode([
                 'success' => true, 
                 'message' => 'Login successful! Redirecting...',
-                'redirect' => url('/dashboard')
+                'redirect' => url("/$prefix/dashboard")
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid username or password']);

@@ -30,7 +30,7 @@ class User
     public function findById($id)
     {
         $stmt = $this->db->prepare("
-            SELECT u.*, r.slug as role_slug 
+            SELECT u.*, r.slug as role_slug, r.name as role_name 
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
             WHERE u.id = :id AND u.deleted_at IS NULL

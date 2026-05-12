@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use App\Core\Database;
 use App\Middleware\AuthMiddleware;
+use PDO;
 
 class DashboardController
 {
@@ -20,6 +21,16 @@ class DashboardController
 
     public function index()
     {
+        $role = $_SESSION['user_role'] ?? 'staff';
+        $prefix = ($role === 'admin') ? 'admin' : 'staff';
+        $currentUri = $_SERVER['REQUEST_URI'];
+
+        // If accessing root or generic dashboard, redirect to role-prefixed dashboard
+        if ($currentUri == url('/') || $currentUri == url('/dashboard')) {
+            header('Location: ' . url("/$prefix/dashboard"));
+            exit;
+        }
+
         $title = 'Dashboard';
         $active_page = 'dashboard';
 
@@ -39,15 +50,29 @@ class DashboardController
     {
         header('Content-Type: application/json');
         
-        // Task priority distribution
-        $stmt = $this->db->query("SELECT priority, COUNT(*) as count FROM tasks WHERE deleted_at IS NULL GROUP BY priority");
-        $tasks = $stmt->fetchAll();
+        // Project status distribution
+        $stmt = $this->db->query("SELECT status, COUNT(*) as count FROM projects WHERE deleted_at IS NULL GROUP BY status");
+        $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Growth Analysis (tasks over time)
-        $stmt = $this->db->query("SELECT DATE(created_at) as date, COUNT(*) as count FROM tasks WHERE deleted_at IS NULL GROUP BY DATE(created_at) ORDER BY date DESC LIMIT 7");
-        $growth = array_reverse($stmt->fetchAll());
+        // Task priority distribution - ONLY ACTIVE TASKS
+        $stmt = $this->db->query("SELECT priority, COUNT(*) as count FROM tasks WHERE status != 'completed' AND deleted_at IS NULL GROUP BY priority");
+        $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Growth Analysis (Last 7 Days)
+        $growth = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE DATE(created_at) = :date AND deleted_at IS NULL");
+            $stmt->execute(['date' => $date]);
+            $growth[] = [
+                'date' => $date,
+                'count' => $stmt->fetchColumn()
+            ];
+        }
 
         echo json_encode([
+            'success' => true,
+            'projects' => $projects,
             'tasks' => $tasks,
             'growth' => $growth
         ]);
@@ -56,44 +81,65 @@ class DashboardController
     public function getPriorityTasks()
     {
         header('Content-Type: application/json');
-        $priority = $_GET['priority'] ?? 'high';
-        $taskModel = new \App\Models\Task();
+        $priority = $_GET['priority'] ?? '';
         
-        $userId = ($_SESSION['user_role'] !== 'admin') ? $_SESSION['user_id'] : null;
-        $tasks = $taskModel->listByPriority($priority, $userId);
-        
-        echo json_encode(['success' => true, 'data' => $tasks]);
+        if (!$priority) {
+            echo json_encode(['success' => false, 'message' => 'Priority required']);
+            return;
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT t.*, p.project_name, u.full_name as staff_name 
+            FROM tasks t
+            JOIN projects p ON t.project_id = p.id
+            JOIN users u ON t.assigned_to = u.id
+            WHERE t.priority = :priority 
+            AND t.status != 'completed' 
+            AND t.deleted_at IS NULL
+            ORDER BY t.created_at DESC
+        ");
+        $stmt->execute(['priority' => $priority]);
+        $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'data' => $tasks
+        ]);
     }
 
     public function getAlerts()
     {
         header('Content-Type: application/json');
-        if ($_SESSION['user_role'] !== 'admin') {
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-            return;
-        }
+        $stmt = $this->db->query("
+            SELECT a.*, t.title as task_title, u.full_name as staff_name 
+            FROM task_alerts a
+            JOIN tasks t ON a.task_id = t.id
+            JOIN users u ON t.assigned_to = u.id
+            WHERE a.is_read = 0
+            ORDER BY a.created_at DESC
+        ");
+        $alerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $alertModel = new \App\Models\TaskAlert();
-        $alerts = $alertModel->listUnread();
-        
-        echo json_encode(['success' => true, 'data' => $alerts]);
+        echo json_encode([
+            'success' => true,
+            'data' => $alerts
+        ]);
     }
 
     public function markAlertRead()
     {
         header('Content-Type: application/json');
-        if ($_SESSION['user_role'] !== 'admin') {
-            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        $id = $_POST['id'] ?? '';
+        
+        if (!$id) {
+            echo json_encode(['success' => false]);
             return;
         }
 
-        $id = $_POST['id'] ?? '';
-        $alertModel = new \App\Models\TaskAlert();
-        if ($alertModel->markAsRead($id)) {
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false]);
-        }
+        $stmt = $this->db->prepare("UPDATE task_alerts SET is_read = 1 WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        echo json_encode(['success' => true]);
     }
 
     private function getStats()
@@ -118,6 +164,6 @@ class DashboardController
             ORDER BY t.created_at DESC
             LIMIT 5
         ");
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

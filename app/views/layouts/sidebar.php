@@ -12,41 +12,48 @@
     </div>
     
     <div class="sidebar-content px-3 flex-grow-1">
+        <?php $prefix = (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin') ? 'admin' : 'staff'; ?>
         <div class="sidebar-label px-3 mb-2">MAIN MENU</div>
         <ul class="nav flex-column mb-auto">
             <li class="nav-item mb-1">
-                <a href="<?= url('/dashboard') ?>" class="nav-link <?= $active_page == 'dashboard' ? 'active' : '' ?>">
+                <a href="<?= url("/$prefix/dashboard") ?>" class="nav-link <?= $active_page == 'dashboard' ? 'active' : '' ?>">
                     <i class="fas fa-house me-3"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a href="<?= url('/projects') ?>" class="nav-link <?= $active_page == 'projects' ? 'active' : '' ?>">
+                <a href="<?= url("/$prefix/projects") ?>" class="nav-link <?= $active_page == 'projects' ? 'active' : '' ?>">
                     <i class="fas fa-folder me-3"></i>
                     <span>Projects</span>
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a href="<?= url('/tasks') ?>" class="nav-link <?= $active_page == 'tasks' ? 'active' : '' ?>">
+                <a href="<?= url("/$prefix/tasks") ?>" class="nav-link <?= $active_page == 'tasks' ? 'active' : '' ?>">
                     <i class="fas fa-check-square me-3"></i>
                     <span>Tasks</span>
                 </a>
             </li>
             <li class="nav-item mb-1">
-                <a href="<?= url('/profile') ?>" class="nav-link <?= $active_page == 'profile' ? 'active' : '' ?>">
+                <a href="<?= url("/$prefix/profile") ?>" class="nav-link <?= $active_page == 'profile' ? 'active' : '' ?>">
                     <i class="fas fa-user-circle me-3"></i>
                     <span>My Profile</span>
                 </a>
             </li>
         </ul>
 
-        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>
+        <?php if ($prefix == 'admin'): ?>
         <div class="sidebar-label px-3 mt-4 mb-2">ADMINISTRATION</div>
         <ul class="nav flex-column">
             <li class="nav-item mb-1">
-                <a href="<?= url('/staff') ?>" class="nav-link <?= $active_page == 'staff' ? 'active' : '' ?>">
+                <a href="<?= url('/admin/staff') ?>" class="nav-link <?= $active_page == 'staff' ? 'active' : '' ?>">
                     <i class="fas fa-users me-3"></i>
                     <span>Team Members</span>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="<?= url('/admin/kpi') ?>" class="nav-link <?= $active_page == 'kpi' ? 'active' : '' ?>">
+                    <i class="fas fa-chart-line me-3"></i>
+                    <span>KPI Management</span>
                 </a>
             </li>
         </ul>
@@ -69,7 +76,7 @@
                         <i class="fas fa-ellipsis-vertical"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-xl border-0 rounded-4">
-                        <li><a class="dropdown-item py-2" href="<?= url('/profile') ?>"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="<?= url("/$prefix/profile") ?>"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item py-2 text-danger" href="<?= url('/logout') ?>"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>

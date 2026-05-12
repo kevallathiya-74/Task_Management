@@ -1,231 +1,7 @@
-DASHBOARD + TASK PRIORITY SYSTEM UPDATE REQUIRED
+KPI DAILY SCORING SYSTEM UPDATE REQUIRED
 
 IMPORTANT:
-Update existing files if already created.
-If file does not exist, create new file properly.
-
-Update:
-
-* frontend
-* backend
-* database
-* AJAX logic
-* notifications
-* dashboard UI
-* responsive behavior
-
-Use existing project structure and documentation.
-
-Current dashboard layout is not optimized.
-
-REQUIRED CHANGES:
-
-1. Move "Task Priority" section from RIGHT SIDE to LEFT SIDE.
-
-2. Move "Growth Analysis / Graph" section BELOW Task Priority.
-
-New Layout Structure:
-
-TOP:
-
-* Statistics Cards
-
-MIDDLE LEFT:
-
-* Task Priority Card
-
-MIDDLE RIGHT:
-
-* Recent Assignments / Analytics Summary
-
-BOTTOM:
-
-* Growth Analysis Graph
-
-Create a FULL task priority management system.
-
-Priority Types:
-
-* High
-* Medium
-* Low
-
-When admin clicks any priority item:
-
-Example:
-
-* High Priority
-* Medium Priority
-* Low Priority
-
-Then show:
-
-1. Which staff member is assigned
-2. Project name
-3. Task name
-4. Due date
-5. Task status
-6. Completion checkbox
-7. Incomplete checkbox
-
-Create modern glassmorphism modal popup.
-
-Modal must contain:
-
-* Task details
-* Staff avatar/name
-* Priority badge
-* Due date
-* Status badge
-* Complete checkbox
-* Incomplete checkbox
-
-UI Style:
-
-* Purple glassmorphism
-* Rounded modern cards
-* Smooth animations
-* Responsive
-
-Staff dashboard should use SAME layout pattern.
-
-When staff clicks Task Priority:
-
-Show:
-
-* Their assigned tasks only
-* Priority level
-* Due date
-* Task status
-
-Add:
-
-* Complete checkbox
-* Incomplete checkbox
-
-Checkbox Rules:
-
-1. If Complete checked:
-
-* Update task status = completed
-* Save completed_at timestamp
-* Update admin dashboard instantly
-
-2. If Incomplete checked:
-
-* Status = incomplete
-* Trigger admin popup notification
-* Store alert in database
-
-VERY IMPORTANT FEATURE.
-
-If staff marks task as incomplete due date and time then after :
-
-Admin dashboard should show CONTINUOUS popup notification until admin acknowledges.
-
-Popup Example:
-"Task Incomplete Alert:
-AI Video Editing task assigned to Keval is marked incomplete."
-
-Features:
-
-* Realtime-like polling every 10 seconds using AJAX
-* Notification sound optional
-* Glassmorphism popup UI
-* Admin can:
-
-  * View task
-  * Dismiss alert
-  * Reassign task
-
-Update database schema properly.
-
-If table exists:
-
-* ALTER table safely
-
-If not:
-
-* CREATE new table
-
-TASKS TABLE:
-Add:
-
-* priority ENUM('high','medium','low')
-* is_completed TINYINT(1)
-* is_incomplete TINYINT(1)
-* completed_at TIMESTAMP NULL
-* admin_alert_sent TINYINT(1)
-
-==================================================
-CREATE TABLE:
-task_alerts
-
-Columns:
-
-* id
-* task_id
-* user_id
-* message
-* is_read
-* created_at
-* updated_at
-
-Create/Update:
-
-1. Task Priority APIs
-2. Task status update APIs
-3. Admin alert APIs
-4. AJAX polling APIs
-5. Notification handlers
-
-1) Get Priority Tasks
-2) Update Task Status
-3) Get Incomplete Alerts
-4) Mark Alert Read
-5) Reassign Task
-
-Update dashboard UI:
-
-* responsive
-* glassmorphism
-* purple gradients
-* smooth hover
-* modern charts
-
-Add:
-
-* interactive priority cards
-* popup modals
-* animated notifications
-* live task updates
-* loading skeletons
-
-Use:
-
-* AJAX polling every 10 seconds
-* No page refresh
-
-Admin should instantly see:
-
-* incomplete task alerts
-* completed tasks
-* updated priorities
-
-- Validate all AJAX requests
-- CSRF protection
-- Role validation
-- Staff can only update assigned tasks
-- Admin-only alert management
-
-* Light theme only
-* Premium SaaS look
-* Purple glassmorphism
-* No overflow issues
-* Fully responsive
-* Mobile/tablet support
-* Smooth animations
-* No old Bootstrap styling
+Update existing KPI system with DAILY scoring workflow.
 
 If file exists:
 
@@ -235,17 +11,250 @@ If file missing:
 
 * CREATE new file
 
-Do NOT duplicate logic.
-Use reusable components and services.
+Update:
 
-Dashboard should feel like:
+* frontend
+* backend
+* database
+* validation
+* reports
+* monthly calculations
+* KPI analytics
 
-* premium SaaS
-* modern agency management system
-* realtime productivity platform
+Use existing purple glassmorphism SaaS UI system.
+
+Admin will add KPI score DAILY for every staff member.
+
+System must automatically:
+
+* store daily KPI records
+* calculate monthly score
+* generate overall performance analytics
+
+Admin Flow:
+
+1. Open KPI Management
+2. Select Staff Member
+3. Select Date
+4. KPI scoring table opens
+5. Admin gives daily scores
+6. Save daily KPI
+
+Columns:
+
+1. KPI Type
+2. Weight
+3. Daily Score
+4. Weighted Score
+5. Notes
+
+1) Productivity
+   Weight:
+   30%
+
+2) Quality
+   Weight:
+   25%
+
+3) Discipline
+   Weight:
+   15%
+
+4) Communication (Standup Meeting)
+   Weight:
+   15%
+
+5) Growth & Ownership
+   Weight:
+   15%
+
+Score Range:
+0 to 10 only
+
+Examples:
+
+* 0
+* 5
+* 7
+* 10
+
+IMPORTANT:
+Add proper validation everywhere.
+
+1. Staff member required
+2. Date required
+3. No future date allowed
+4. Score required
+5. Score must be numeric
+6. Score must be between 0 and 10
+7. Notes max length:
+   1000 characters
+8. Admin only access
+9. Duplicate daily KPI prevention
+
+Admin cannot add KPI twice for:
+
+* same staff
+* same date
+
+If duplicate exists:
+Show error:
+
+"KPI score already added for this staff member on selected date."
+
+Add:
+
+* inline validation
+* realtime validation
+* invalid field highlighting
+* toast notifications
+* loading states
+
+System automatically calculates:
+
+1. Daily KPI Average
+2. Monthly KPI Average
+3. Overall Monthly Score
+4. Salary Approval %
+5. Performance Status
+
+Admin can select staff member and month.
+
+Then system shows:
+
+1. Daily KPI history
+2. Monthly average
+3. Total KPI %
+4. Salary approval %
+5. Performance trend chart
+6. Overall performance status
+
+90-100:
+Excellent
+
+75-89:
+Good
+
+60-74:
+Average
+
+40-59:
+Needs Improvement
+
+0-39:
+Critical
+
+Add KPI analytics cards:
+
+1. Highest Performing Staff
+2. Lowest Performing Staff
+3. Average Team KPI
+4. Monthly KPI Trend
+5. Staff Performance Ranking
+
+Admin can filter KPI reports by:
+
+* Daily
+* Weekly
+* Monthly
+* 3 Months
+* 6 Months
+* 12 Months
+
+Create dedicated page:
+
+Example:
+
+* /admin/kpi/staff-report?id=staff_id
+
+Show:
+
+1. Staff profile card
+2. Monthly KPI graph
+3. Daily KPI table
+4. Overall score
+5. Salary recommendation %
+6. Performance badge
+7. Admin notes history
+
+Update existing KPI table structure.
+
+Columns:
+
+* id
+* user_id
+* kpi_date
+* productivity_score
+* quality_score
+* discipline_score
+* communication_score
+* growth_score
+* weighted_total_score
+* salary_approval_percentage
+* performance_status
+* admin_notes
+* created_by
+* created_at
+* updated_at
+
+Add indexes:
+
+* user_id
+* kpi_date
+* created_by
+
+Add UNIQUE constraint:
+(user_id, kpi_date)
+
+Create/Update APIs:
+
+1. Add Daily KPI
+2. Update Daily KPI
+3. Get Monthly KPI
+4. Get Staff Overall KPI
+5. KPI Analytics Summary
+6. KPI Ranking Report
+
+Use AJAX:
+
+* save KPI without refresh
+* realtime calculations
+* dynamic monthly analytics
+* instant validation
+
+Use:
+
+* glassmorphism cards
+* premium KPI tables
+* purple gradients
+* animated score counters
+* modern analytics charts
+* responsive layouts
+
+- Admin-only middleware
+- CSRF validation
+- SQL injection prevention
+- XSS escaping
+- Secure AJAX requests
+- Role validation
+
+Staff MUST NOT:
+
+* access KPI routes
+* see KPI sidebar
+* see KPI reports
+* modify KPI data
+
+Admin only access.
+
+KPI system should feel like:
+
+* enterprise employee evaluation platform
+* modern HR analytics dashboard
+* premium performance tracking SaaS
 
 NOT:
 
-* basic admin template
-* static dashboard
-* simple CRUD panel
+* simple spreadsheet
+* static score form
+* basic CRUD system

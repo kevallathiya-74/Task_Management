@@ -103,7 +103,7 @@
                 <div class="glass-card h-100 overflow-hidden">
                     <div class="p-4 border-bottom border-light d-flex justify-content-between align-items-center">
                         <h5 class="fw-bold text-neutral-900 mb-0">Recent Assignments</h5>
-                        <a href="<?= url('/tasks') ?>" class="btn btn-xs btn-primary-soft rounded-pill px-3">View All</a>
+                        <a href="<?= url('admin/tasks') ?>" class="btn btn-xs btn-primary-soft rounded-pill px-3">View All</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">

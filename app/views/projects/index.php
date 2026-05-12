@@ -93,7 +93,7 @@
                     </div>
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Department</label>
+                            <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Department Role</label>
                             <select class="form-select border-0 bg-neutral-100 rounded-3 py-3" name="role_id" required>
                                 <option value="">Select Department</option>
                                 <?php foreach ($roles as $role): ?>

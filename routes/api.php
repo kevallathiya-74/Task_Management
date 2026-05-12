@@ -32,3 +32,10 @@ $router->post('/api/dashboard/alerts/read', 'DashboardController@markAlertRead')
 
 // Profile & Settings
 $router->post('/api/profile/update', 'ProfileController@update');
+
+// KPI Management
+$router->get('/api/admin/kpi/daily-record', 'KPIController@getDailyRecord');
+$router->get('/api/admin/kpi/monthly-report', 'KPIController@getMonthlyReport');
+$router->get('/api/admin/kpi/staff-report-data', 'KPIController@getStaffReportData');
+$router->post('/api/admin/kpi/save-daily', 'KPIController@saveDaily');
+$router->post('/api/admin/kpi/log-report', 'KPIController@logReport');
