@@ -39,6 +39,12 @@
                     <span>My Profile</span>
                 </a>
             </li>
+            <li class="nav-item mb-1">
+                <a href="<?= url("/$prefix/leaves") ?>" class="nav-link <?= $active_page == 'leaves' ? 'active' : '' ?>">
+                    <i class="fas fa-calendar-alt me-3"></i>
+                    <span>Leave Management</span>
+                </a>
+            </li>
         </ul>
 
         <?php if ($prefix == 'admin'): ?>
@@ -54,6 +60,12 @@
                 <a href="<?= url('/admin/kpi') ?>" class="nav-link <?= $active_page == 'kpi' ? 'active' : '' ?>">
                     <i class="fas fa-chart-line me-3"></i>
                     <span>KPI Management</span>
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="<?= url('/admin/leaves') ?>" class="nav-link <?= $active_page == 'leaves_admin' ? 'active' : '' ?>">
+                    <i class="fas fa-calendar-check me-3"></i>
+                    <span>Leave Requests</span>
                 </a>
             </li>
         </ul>

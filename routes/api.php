@@ -39,3 +39,9 @@ $router->get('/api/admin/kpi/monthly-report', 'KPIController@getMonthlyReport');
 $router->get('/api/admin/kpi/staff-report-data', 'KPIController@getStaffReportData');
 $router->post('/api/admin/kpi/save-daily', 'KPIController@saveDaily');
 $router->post('/api/admin/kpi/log-report', 'KPIController@logReport');
+
+// Leave Management
+$router->get('/api/leaves/list', 'LeaveController@getList');
+$router->post('/api/leaves/submit', 'LeaveController@submitRequest');
+$router->post('/api/leaves/update-status', 'LeaveController@updateStatus');
+$router->post('/api/leaves/cancel', 'LeaveController@cancelRequest');

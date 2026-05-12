@@ -26,5 +26,8 @@ $router->get('/staff/tasks', 'TaskController@index');
 $router->get('/admin/kpi', 'KPIController@index');
 $router->get('/admin/kpi/staff-report', 'KPIController@staffReport');
 
+$router->get('/admin/leaves', 'LeaveController@adminIndex');
+$router->get('/staff/leaves', 'LeaveController@staffIndex');
+
 $router->get('/admin/profile', 'ProfileController@index');
 $router->get('/staff/profile', 'ProfileController@index');
