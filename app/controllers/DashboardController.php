@@ -57,6 +57,7 @@ class DashboardController
     {
         return [
             'total_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL")->fetchColumn(),
+            'active_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE status = 'active' AND deleted_at IS NULL")->fetchColumn(),
             'active_tasks' => $this->db->query("SELECT COUNT(*) FROM tasks WHERE status != 'completed' AND deleted_at IS NULL")->fetchColumn(),
             'total_staff' => $this->db->query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL")->fetchColumn(),
             'completed_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE status = 'completed' AND deleted_at IS NULL")->fetchColumn()

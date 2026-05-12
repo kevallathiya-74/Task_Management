@@ -59,16 +59,16 @@ $(document).ready(function() {
         "debug": false,
         "newestOnTop": true,
         "progressBar": true,
-        "positionClass": "toast-top-right",
+        "positionClass": "toast-bottom-right", // Changed for modern feel
         "preventDuplicates": false,
         "onclick": null,
-        "showDuration": "300",
+        "showDuration": "400",
         "hideDuration": "1000",
-        "timeOut": "5000",
+        "timeOut": "6000",
         "extendedTimeOut": "1000",
         "showEasing": "swing",
         "hideEasing": "linear",
-        "showMethod": "fadeIn",
+        "showMethod": "slideDown", // Smoother transition
         "hideMethod": "fadeOut"
     };
 });
