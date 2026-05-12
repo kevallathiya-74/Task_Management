@@ -97,6 +97,27 @@ class Project
         return $stmt->execute(['id' => $id]);
     }
 
+    public function countAll()
+    {
+        $stmt = $this->db->query("SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL");
+        return $stmt->fetchColumn();
+    }
+
+    public function listActiveByStaff($userId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT DISTINCT p.* 
+            FROM projects p 
+            JOIN tasks t ON p.id = t.project_id 
+            WHERE t.assigned_to = :user_id 
+            AND p.status = 'active' 
+            AND p.deleted_at IS NULL 
+            AND t.deleted_at IS NULL
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetchAll();
+    }
+
     private function generateUuid()
     {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',

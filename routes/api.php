@@ -21,7 +21,14 @@ $router->post('/api/projects/delete', 'ProjectController@delete');
 $router->get('/api/tasks', 'TaskController@list');
 $router->post('/api/tasks', 'TaskController@create');
 $router->post('/api/tasks/update', 'TaskController@update');
+$router->post('/api/tasks/update-status', 'TaskController@updateStatus');
 $router->post('/api/tasks/delete', 'TaskController@delete');
 
 // Dashboard & Analytics
 $router->get('/api/dashboard/charts', 'DashboardController@getChartData');
+$router->get('/api/dashboard/priority-tasks', 'DashboardController@getPriorityTasks');
+$router->get('/api/dashboard/alerts', 'DashboardController@getAlerts');
+$router->post('/api/dashboard/alerts/read', 'DashboardController@markAlertRead');
+
+// Profile & Settings
+$router->post('/api/profile/update', 'ProfileController@update');

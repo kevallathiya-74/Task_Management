@@ -32,6 +32,12 @@
                     <span>Tasks</span>
                 </a>
             </li>
+            <li class="nav-item mb-1">
+                <a href="<?= url('/profile') ?>" class="nav-link <?= $active_page == 'profile' ? 'active' : '' ?>">
+                    <i class="fas fa-user-circle me-3"></i>
+                    <span>My Profile</span>
+                </a>
+            </li>
         </ul>
 
         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin'): ?>

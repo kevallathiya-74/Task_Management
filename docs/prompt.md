@@ -1,154 +1,251 @@
-UI/UX FULL REDESIGN REQUIRED
+DASHBOARD + TASK PRIORITY SYSTEM UPDATE REQUIRED
 
-Current dashboard UI looks outdated and basic.
-Completely redesign the entire system into a premium modern SaaS dashboard.
+IMPORTANT:
+Update existing files if already created.
+If file does not exist, create new file properly.
 
-note : if file existsing so you can upadate, if not exist so you can create and write  
+Update:
 
-IMPORTANT DESIGN RULES:
+* frontend
+* backend
+* database
+* AJAX logic
+* notifications
+* dashboard UI
+* responsive behavior
 
-1. Theme Style:
+Use existing project structure and documentation.
 
-* Light theme ONLY
-* NO dark mode
-* Premium SaaS design
-* Glassmorphism UI
-* Purple gradient branding
-* Soft shadows
-* Frosted glass effects
-* Modern spacing system
-* Professional typography
+Current dashboard layout is not optimized.
 
-2. Design Inspiration:
-   Use design quality similar to:
+REQUIRED CHANGES:
 
-* Linear
-* Framer
-* Notion
-* Stripe Dashboard
-* Vercel Dashboard
+1. Move "Task Priority" section from RIGHT SIDE to LEFT SIDE.
 
-3. Color Direction:
-   Primary:
+2. Move "Growth Analysis / Graph" section BELOW Task Priority.
 
-* Purple gradients
-* Soft violet
-* Indigo accents
+New Layout Structure:
 
-Background:
+TOP:
 
-* Soft light gray gradients
-* White transparent glass layers
+* Statistics Cards
 
-Cards:
+MIDDLE LEFT:
 
-* rgba glass backgrounds
-* backdrop blur
-* subtle borders
-* floating shadows
+* Task Priority Card
 
-4. Sidebar Redesign (full responsive make it all device in proper support not a overflow & overlap):
-   Current sidebar is too empty and outdated.
+MIDDLE RIGHT:
 
-Redesign sidebar with:
+* Recent Assignments / Analytics Summary
 
-* Glassmorphism container
-* Floating active menu item
-* Gradient active state
-* Better icon containers
-* Better spacing
-* User profile glass card at bottom
-* Smooth hover transitions
-* Rounded modern design
+BOTTOM:
 
-5. Dashboard Cards:
-   Redesign all statistic cards:
+* Growth Analysis Graph
 
-* Glass cards
-* Gradient icon backgrounds
-* Better typography hierarchy
-* Hover animation
-* Smooth shadows
-* Modern spacing
+Create a FULL task priority management system.
 
-6. Charts Section:
-   Current charts look broken and default.
+Priority Types:
 
-Redesign charts:
+* High
+* Medium
+* Low
 
-* Premium analytics UI
-* Gradient charts
-* Clean gridlines
-* Rounded chart containers
-* Better responsive behavior
-* Professional tooltip styling
+When admin clicks any priority item:
 
-7. Tables:
-   Redesign tables:
+Example:
 
-* Rounded glass containers
-* Sticky headers
-* Better row hover
-* Status badges
-* Clean typography
-* Responsive mobile cards
+* High Priority
+* Medium Priority
+* Low Priority
 
-8. Forms:
-   Redesign forms:
+Then show:
 
-* Floating labels
-* Modern inputs
-* Glass input fields
-* Gradient focus states
-* Better validation UI
+1. Which staff member is assigned
+2. Project name
+3. Task name
+4. Due date
+5. Task status
+6. Completion checkbox
+7. Incomplete checkbox
 
-9. Buttons:
-   Use:
+Create modern glassmorphism modal popup.
 
-* Purple gradients
-* Rounded-xl
-* Smooth hover lift
-* Glow effect
-* Modern micro interactions
+Modal must contain:
 
-10. Layout:
-    Improve:
+* Task details
+* Staff avatar/name
+* Priority badge
+* Due date
+* Status badge
+* Complete checkbox
+* Incomplete checkbox
 
-* spacing rhythm
-* content width
-* grid balance
-* visual hierarchy
+UI Style:
 
-11. Animations:
-    Add:
+* Purple glassmorphism
+* Rounded modern cards
+* Smooth animations
+* Responsive
 
-* smooth hover transitions
-* card lift effect
-* sidebar animation
+Staff dashboard should use SAME layout pattern.
+
+When staff clicks Task Priority:
+
+Show:
+
+* Their assigned tasks only
+* Priority level
+* Due date
+* Task status
+
+Add:
+
+* Complete checkbox
+* Incomplete checkbox
+
+Checkbox Rules:
+
+1. If Complete checked:
+
+* Update task status = completed
+* Save completed_at timestamp
+* Update admin dashboard instantly
+
+2. If Incomplete checked:
+
+* Status = incomplete
+* Trigger admin popup notification
+* Store alert in database
+
+VERY IMPORTANT FEATURE.
+
+If staff marks task as incomplete due date and time then after :
+
+Admin dashboard should show CONTINUOUS popup notification until admin acknowledges.
+
+Popup Example:
+"Task Incomplete Alert:
+AI Video Editing task assigned to Keval is marked incomplete."
+
+Features:
+
+* Realtime-like polling every 10 seconds using AJAX
+* Notification sound optional
+* Glassmorphism popup UI
+* Admin can:
+
+  * View task
+  * Dismiss alert
+  * Reassign task
+
+Update database schema properly.
+
+If table exists:
+
+* ALTER table safely
+
+If not:
+
+* CREATE new table
+
+TASKS TABLE:
+Add:
+
+* priority ENUM('high','medium','low')
+* is_completed TINYINT(1)
+* is_incomplete TINYINT(1)
+* completed_at TIMESTAMP NULL
+* admin_alert_sent TINYINT(1)
+
+==================================================
+CREATE TABLE:
+task_alerts
+
+Columns:
+
+* id
+* task_id
+* user_id
+* message
+* is_read
+* created_at
+* updated_at
+
+Create/Update:
+
+1. Task Priority APIs
+2. Task status update APIs
+3. Admin alert APIs
+4. AJAX polling APIs
+5. Notification handlers
+
+1) Get Priority Tasks
+2) Update Task Status
+3) Get Incomplete Alerts
+4) Mark Alert Read
+5) Reassign Task
+
+Update dashboard UI:
+
+* responsive
+* glassmorphism
+* purple gradients
+* smooth hover
+* modern charts
+
+Add:
+
+* interactive priority cards
+* popup modals
+* animated notifications
+* live task updates
 * loading skeletons
-* fade transitions
 
-12. Mobile Responsiveness:
-    Must look premium on:
+Use:
 
-* desktop
-* tablet
-* mobile
+* AJAX polling every 10 seconds
+* No page refresh
 
-13. Important:
-    DO NOT use generic admin template styling.
-    DO NOT use old Bootstrap default look.
-    DO NOT use flat design.
+Admin should instantly see:
 
-14. Use Existing Docs:
-    Read:
+* incomplete task alerts
+* completed tasks
+* updated priorities
 
-* FRONTEND_GUIDELINES.md
-* references folder
-* all UI/UX reference docs
+- Validate all AJAX requests
+- CSRF protection
+- Role validation
+- Staff can only update assigned tasks
+- Admin-only alert management
 
-15. Goal:
-    The final UI should look like a premium modern SaaS product users would pay for.
+* Light theme only
+* Premium SaaS look
+* Purple glassmorphism
+* No overflow issues
+* Fully responsive
+* Mobile/tablet support
+* Smooth animations
+* No old Bootstrap styling
 
-Do not redesign everything randomly.
-Create a consistent design system first.
+If file exists:
+
+* UPDATE existing file
+
+If file missing:
+
+* CREATE new file
+
+Do NOT duplicate logic.
+Use reusable components and services.
+
+Dashboard should feel like:
+
+* premium SaaS
+* modern agency management system
+* realtime productivity platform
+
+NOT:
+
+* basic admin template
+* static dashboard
+* simple CRUD panel

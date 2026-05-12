@@ -127,7 +127,7 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Priority</label>
                             <select class="form-select border-0 bg-neutral-100 rounded-3 py-3" name="priority">
                                 <option value="low">Low</option>
@@ -135,9 +135,23 @@
                                 <option value="high">High</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Status</label>
+                            <select class="form-select border-0 bg-neutral-100 rounded-3 py-3" name="status">
+                                <option value="pending">Pending</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="review">Review</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Expected Delivery</label>
-                            <input type="date" class="form-control rounded-3 py-3" name="due_date" required value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                            <div class="input-group gap-0">
+                                <span class="input-group-text bg-neutral-100 border-0 rounded-start-3 px-3"><i class="far fa-calendar text-primary"></i></span>
+                                <input type="date" class="form-control bg-neutral-100 border-0 py-3" name="due_date" required value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                                <span class="input-group-text bg-neutral-100 border-0 px-2"><i class="far fa-clock text-primary"></i></span>
+                                <input type="time" class="form-control bg-neutral-100 border-0 rounded-end-3 py-3" name="due_time" required value="09:00">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -188,7 +202,7 @@
                         </div>
                     </div>
                     <div class="row g-4 mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Priority</label>
                             <select class="form-select border-0 bg-neutral-100 rounded-3 py-3" name="priority" id="edit_priority">
                                 <option value="low">Low</option>
@@ -196,7 +210,7 @@
                                 <option value="high">High</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Status</label>
                             <select class="form-select border-0 bg-neutral-100 rounded-3 py-3" name="status" id="edit_status">
                                 <option value="pending">Pending</option>
@@ -205,9 +219,14 @@
                                 <option value="completed">Completed</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase">Expected Delivery</label>
-                            <input type="date" class="form-control rounded-3 py-3" name="due_date" id="edit_due_date" required>
+                            <div class="input-group gap-0">
+                                <span class="input-group-text bg-neutral-100 border-0 rounded-start-3 px-3"><i class="far fa-calendar text-primary"></i></span>
+                                <input type="date" class="form-control bg-neutral-100 border-0 py-3" name="due_date" id="edit_due_date" required>
+                                <span class="input-group-text bg-neutral-100 border-0 px-2"><i class="far fa-clock text-primary"></i></span>
+                                <input type="time" class="form-control bg-neutral-100 border-0 rounded-end-3 py-3" name="due_time" id="edit_due_time" required>
+                            </div>
                         </div>
                     </div>
                     <div class="row g-4">
@@ -327,7 +346,12 @@ $(document).ready(function() {
                             </div>
                             <div class="text-xs">
                                 <div class="text-neutral-400">Target</div>
-                                <div class="fw-bold ${isOverdue ? 'text-danger' : 'text-neutral-900'}">${date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>
+                                <div class="fw-bold ${isOverdue ? 'text-danger' : 'text-neutral-900'} d-flex align-items-center flex-nowrap" style="white-space: nowrap;">
+                                    ${date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} 
+                                    <span class="text-neutral-400 fw-normal ms-2 small">
+                                        ${row.due_time ? moment(row.due_time, 'HH:mm:ss').format('hh:mm A') : ''}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -390,7 +414,11 @@ $(document).ready(function() {
         $('#edit_role_id').val(data.role_id);
         $('#edit_priority').val(data.priority);
         $('#edit_status').val(data.status);
-        $('#edit_due_date').val(data.due_date);
+        if (data.due_date) {
+            const dt = data.due_date.split(' ');
+            $('#edit_due_date').val(dt[0]);
+            $('#edit_due_time').val(dt[1] ? dt[1].substring(0, 5) : '09:00');
+        }
         
         const prog = data.progress_percentage || 0;
         $('#edit_progress').val(prog);
@@ -436,4 +464,35 @@ $(document).ready(function() {
 
 .form-range::-webkit-slider-runnable-track { background: var(--neutral-100); height: 8px; border-radius: 10px; }
 .form-range::-webkit-slider-thumb { margin-top: -4px; background: var(--primary-500); width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+.input-group-text {
+    color: var(--neutral-400);
+    font-size: 0.9rem;
+}
+
+.input-group .form-control:focus {
+    z-index: 3;
+    box-shadow: none;
+}
+
+/* Hide native browser date/time icons */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    z-index: 2;
+}
+
+/* Remove default padding for native icons */
+input[type="date"], input[type="time"] {
+    position: relative;
+}
 </style>
