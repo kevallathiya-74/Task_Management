@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\TaskAlert;
 use App\Middleware\AuthMiddleware;
 
 class TaskController
@@ -32,7 +33,6 @@ class TaskController
         $projects = $this->projectModel->listAll();
         $staff = $this->userModel->listAll();
         $roles = $this->roleModel->all();
-        $project_id = $_GET['project_id'] ?? null;
 
         require_once ROOT_PATH . '/app/views/layouts/header.php';
         require_once ROOT_PATH . '/app/views/layouts/sidebar.php';
@@ -52,12 +52,6 @@ class TaskController
                 'role_id' => $_GET['role_id'] ?? null
             ];
 
-            // If user is not admin, they can only see tasks assigned to them (unless they are a manager of that dept - but keeping it simple for now)
-            if ($_SESSION['user_role'] !== 'admin' && empty($filters['assigned_to'])) {
-                // $filters['assigned_to'] = $_SESSION['user_id']; 
-                // Let's allow staff to see all tasks for now as per PRD "Transparency"
-            }
-
             $tasks = $this->taskModel->listAll($filters);
             
             echo json_encode([
@@ -71,6 +65,7 @@ class TaskController
 
     public function create()
     {
+        AuthMiddleware::adminOnly();
         header('Content-Type: application/json');
 
         try {
@@ -78,8 +73,8 @@ class TaskController
                 'project_id' => $_POST['project_id'] ?? '',
                 'assigned_to' => $_POST['assigned_to'] ?? '',
                 'role_id' => $_POST['role_id'] ?? '',
-                'title' => $_POST['title'] ?? '',
-                'description' => $_POST['description'] ?? '',
+                'title' => trim($_POST['title'] ?? ''),
+                'description' => trim($_POST['description'] ?? ''),
                 'due_date' => (!empty($_POST['due_date']) && !empty($_POST['due_time'])) ? $_POST['due_date'] . ' ' . $_POST['due_time'] : date('Y-m-d H:i'),
                 'due_time' => $_POST['due_time'] ?? '09:00',
                 'priority' => $_POST['priority'] ?? 'medium',
@@ -88,6 +83,16 @@ class TaskController
 
             if (empty($data['project_id']) || empty($data['assigned_to']) || empty($data['title'])) {
                 echo json_encode(['success' => false, 'message' => 'Project, Assignee, and Title are required']);
+                return;
+            }
+
+            // Verify existence
+            if (!$this->projectModel->findById($data['project_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid project selected']);
+                return;
+            }
+            if (!$this->userModel->findById($data['assigned_to'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid assignee selected']);
                 return;
             }
 
@@ -119,22 +124,35 @@ class TaskController
                 return;
             }
 
+            // Authorization check: Admin or Assignee
+            if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
+                echo json_encode(['success' => false, 'message' => 'You are not authorized to update this task']);
+                return;
+            }
+
             $data = [
                 'assigned_to' => $_POST['assigned_to'] ?? $task['assigned_to'],
                 'role_id' => $_POST['role_id'] ?? $task['role_id'],
-                'title' => $_POST['title'] ?? $task['title'],
-                'description' => $_POST['description'] ?? $task['description'],
+                'title' => trim($_POST['title'] ?? $task['title']),
+                'description' => trim($_POST['description'] ?? $task['description']),
                 'status' => $_POST['status'] ?? $task['status'],
                 'due_date' => (!empty($_POST['due_date']) && !empty($_POST['due_time'])) ? $_POST['due_date'] . ' ' . $_POST['due_time'] : $task['due_date'],
                 'due_time' => $_POST['due_time'] ?? $task['due_time'],
                 'priority' => $_POST['priority'] ?? $task['priority'],
                 'progress_percentage' => $_POST['progress_percentage'] ?? $task['progress_percentage'],
-                'status_notes' => $_POST['status_notes'] ?? $task['status_notes'],
+                'status_notes' => trim($_POST['status_notes'] ?? $task['status_notes']),
                 'is_completed' => $task['is_completed'],
                 'is_incomplete' => $task['is_incomplete'],
                 'completed_at' => $task['completed_at'],
                 'admin_alert_sent' => $task['admin_alert_sent']
             ];
+
+            // If not admin, restrict certain fields
+            if ($_SESSION['user_role'] !== 'admin') {
+                $data['assigned_to'] = $task['assigned_to'];
+                $data['role_id'] = $task['role_id'];
+                $data['title'] = $task['title'];
+            }
 
             if ($this->taskModel->update($id, $data)) {
                 echo json_encode(['success' => true, 'message' => 'Task updated successfully']);
@@ -159,6 +177,8 @@ class TaskController
 
         if ($this->taskModel->softDelete($id)) {
             echo json_encode(['success' => true, 'message' => 'Task deleted successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to delete task']);
         }
     }
 
@@ -181,28 +201,13 @@ class TaskController
                 return;
             }
 
-            // Role check
+            // Authorization check
             if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
                 echo json_encode(['success' => false, 'message' => 'Unauthorized']);
                 return;
             }
 
-            $data = [
-                'assigned_to' => $task['assigned_to'],
-                'role_id' => $task['role_id'],
-                'title' => $task['title'],
-                'description' => $task['description'],
-                'due_date' => $task['due_date'],
-                'due_time' => $task['due_time'],
-                'priority' => $task['priority'],
-                'progress_percentage' => $task['progress_percentage'],
-                'status_notes' => $task['status_notes'],
-                'is_completed' => $task['is_completed'],
-                'is_incomplete' => $task['is_incomplete'],
-                'completed_at' => $task['completed_at'],
-                'admin_alert_sent' => $task['admin_alert_sent'],
-                'status' => $task['status']
-            ];
+            $data = $task; // Start with current data
 
             if ($type === 'complete') {
                 $data['is_completed'] = 1;
@@ -213,11 +218,10 @@ class TaskController
             } elseif ($type === 'incomplete') {
                 $data['is_incomplete'] = 1;
                 $data['is_completed'] = 0;
-                $data['status'] = 'in_progress'; // or keep existing
+                $data['status'] = 'in_progress';
                 
-                // Create alert if not already sent
                 if (!$task['admin_alert_sent']) {
-                    $alertModel = new \App\Models\TaskAlert();
+                    $alertModel = new TaskAlert();
                     $alertModel->create([
                         'task_id' => $id,
                         'user_id' => $task['assigned_to'],

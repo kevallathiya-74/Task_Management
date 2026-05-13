@@ -58,17 +58,34 @@ class ProjectController
 
         try {
             $data = [
-                'project_name' => $_POST['project_name'] ?? '',
-                'client_name' => $_POST['client_name'] ?? '',
-                'description' => $_POST['description'] ?? '',
+                'project_name' => trim($_POST['project_name'] ?? ''),
+                'client_name' => trim($_POST['client_name'] ?? ''),
+                'description' => trim($_POST['description'] ?? ''),
                 'role_id' => $_POST['role_id'] ?? '',
                 'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d'),
                 'deadline' => !empty($_POST['deadline']) ? $_POST['deadline'] : date('Y-m-d', strtotime('+7 days')),
                 'status' => $_POST['status'] ?? 'pending'
             ];
 
+            // Robust Validation
             if (empty($data['project_name']) || empty($data['role_id'])) {
                 echo json_encode(['success' => false, 'message' => 'Project name and department are required']);
+                return;
+            }
+
+            if (strtotime($data['deadline']) < strtotime($data['start_date'])) {
+                echo json_encode(['success' => false, 'message' => 'Deadline cannot be before the start date']);
+                return;
+            }
+
+            if (!$this->roleModel->findById($data['role_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
+                return;
+            }
+
+            // Check duplicate name
+            if ($this->projectModel->findByName($data['project_name'])) {
+                echo json_encode(['success' => false, 'message' => 'A project with this name already exists']);
                 return;
             }
 
@@ -96,9 +113,9 @@ class ProjectController
             }
 
             $data = [
-                'project_name' => $_POST['project_name'] ?? '',
-                'client_name' => $_POST['client_name'] ?? '',
-                'description' => $_POST['description'] ?? '',
+                'project_name' => trim($_POST['project_name'] ?? ''),
+                'client_name' => trim($_POST['client_name'] ?? ''),
+                'description' => trim($_POST['description'] ?? ''),
                 'role_id' => $_POST['role_id'] ?? '',
                 'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d'),
                 'deadline' => !empty($_POST['deadline']) ? $_POST['deadline'] : date('Y-m-d'),
@@ -107,6 +124,16 @@ class ProjectController
 
             if (empty($data['project_name']) || empty($data['role_id'])) {
                 echo json_encode(['success' => false, 'message' => 'Project name and department are required']);
+                return;
+            }
+
+            if (strtotime($data['deadline']) < strtotime($data['start_date'])) {
+                echo json_encode(['success' => false, 'message' => 'Deadline cannot be before the start date']);
+                return;
+            }
+
+            if (!$this->roleModel->findById($data['role_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
                 return;
             }
 

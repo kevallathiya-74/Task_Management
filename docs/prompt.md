@@ -1,306 +1,225 @@
-LEAVE MANAGEMENT SYSTEM FEATURE REQUIRED
+FULL PROJECT ANALYSIS + VALIDATION HARDENING REQUIRED
 
 IMPORTANT:
-Update existing files if already created.
-If file does not exist, create new file properly.
-
-Update:
-
-* frontend
-* backend
-* database
-* staff dashboard
-* admin dashboard
-* AJAX logic
-* notifications
-* validation
-* leave reports
-
-Use existing purple glassmorphism SaaS UI system.
-
-Add new sidebar menu item for STAFF dashboard:
-
-* Leave Management
-
-Position:
-Below:
-
-* My Profile
-
-Icon:
-
-* calendar / leave / vacation icon
-
-Create new page:
-
-Staff Access:
-
-* staff only
-
-Route Example:
-
-* /staff/leave-management
-* /staff/leaves
-
-Create premium glassmorphism leave request form.
-
-Fields:
-
-1. Leave Type Dropdown
-2. From Date
-3. To Date
-4. Total Days (auto calculate)
-5. Leave Reason Textarea
-6. Submit Button
-
-Staff selects:
-
-* From Date
-* To Date
-
-System automatically calculates:
-
-* Total leave days
-
-IMPORTANT:
-Add proper validation everywhere.
-
-1. Required field validation
-2. Invalid date highlighting
-3. Realtime validation
-4. Loading states
-5. Toast notifications
-6. Inline error messages
-
-1) Staff authentication required
-2) Leave type required
-3) From date required
-4) To date required
-5) To date cannot be before from date
-6) No past invalid dates
-7) Reason required
-8) Reason minimum:
-   10 characters
-9) Reason maximum:
-   1000 characters
-10) Maximum leave days validation
-11) Duplicate leave prevention
-
-Staff cannot submit overlapping leave dates.
-
-If overlapping leave exists:
-Show error:
-
-"Leave request already exists for selected dates."
-
-Statuses:
-
-* Pending
-* Approved
-* Rejected
-* Cancelled
-
-Default:
-Pending
-
-Staff can:
-
-1. Create leave request
-2. View leave history
-3. View leave status
-4. Cancel pending leave
-5. Filter leaves by:
-
-   * Pending
-   * Approved
-   * Rejected
-
-Columns:
-
-1. Leave Type
-2. From Date
-3. To Date
-4. Total Days
-5. Status Badge
-6. Applied Date
-7. Admin Comment
-8. Actions
-
-VERY IMPORTANT.
-
-When staff submits leave request:
-
-Admin dashboard should instantly show:
-
-"New Leave Request"
-
-Create admin leave management page.
-
-Route Example:
-
-* /admin/leave-management
-
-Admin can:
-
-1. View all leave requests
-2. Filter by:
-
-   * Pending
-   * Approved
-   * Rejected
-   * Staff Member
-3. Approve leave
-4. Reject leave
-5. Add admin comments
-6. View leave calendar
-7. View leave statistics
-
-Columns:
-
-1. Staff Name
-2. Leave Type
-3. From Date
-4. To Date
-5. Total Days
-6. Reason
-7. Status
-8. Applied Date
-9. Actions
-
-Approve:
-
-* Status = approved
-
-Reject:
-
-* Status = rejected
-
-Add:
-
-* admin comment
-* rejection reason
-
-Use AJAX polling every 10 seconds.
-
-Admin should instantly see:
-
-* new leave requests
-* leave status changes
-* pending approvals
-
-Glassmorphism popup example:
-
-"New Leave Request:
-Keval requested leave from 12 May to 15 May."
-
-Admin can:
-
-* View request
-* Approve
-* Reject
-
-Create new table:
-
-Columns:
-
-* id
-* user_id
-* leave_type
-* from_date
-* to_date
-* total_days
-* reason
-* status
-* admin_comment
-* approved_by
-* approved_at
-* created_at
-* updated_at
-
-ENUM:
-
-* pending
-* approved
-* rejected
-* cancelled
-
-Add indexes:
-
-* user_id
-* status
-* from_date
-* to_date
-
-Create/Update APIs:
-
-1. Create Leave Request
-2. Update Leave Request
-3. Cancel Leave Request
-4. Get Staff Leaves
-5. Get All Leave Requests
-6. Approve Leave
-7. Reject Leave
-
-Use AJAX:
-
-* submit leave without refresh
-* realtime status updates
-* instant validation
-* live admin update
-
-Use:
-
-* glassmorphism cards
-* purple gradients
-* premium tables
-* modern leave calendar
-* floating summary cards
-* animated notifications
-* responsive layouts
-
-Admin dashboard should show:
-
-1. Total Leave Requests
-2. Pending Leaves
-3. Approved Leaves
-4. Rejected Leaves
-5. Monthly Leave Trend
-
-* Staff can only access own leave requests
-* Admin-only approval access
-* CSRF protection
-* SQL injection prevention
-* XSS escaping
-* Secure file uploads
-* Role validation
-
-Fully responsive:
-
-* desktop
-* tablet
-* mobile
-
-No overflow issues.
+Analyze the ENTIRE existing project carefully.
+
+DO NOT add any new features.
+DO NOT change business logic.
+DO NOT redesign existing completed modules unnecessarily.
+
+ONLY:
+
+* analyze
+* optimize
+* secure
+* validate
+* fix inconsistencies
+* improve stability
+* improve validation
+* improve reliability
+
+Make the entire system:
+
+* stable
+* secure
+* production-ready
+* properly validated
+* error-safe
+* consistent
+
+WITHOUT changing existing functionality.
+
+Analyze complete project:
+
+1. Frontend
+2. Backend
+3. Database
+4. AJAX
+5. Sessions
+6. APIs
+7. Forms
+8. Validation
+9. Authentication
+10. Authorization
+11. File structure
+12. Database relationships
+13. Responsive behavior
+14. UI consistency
+15. Error handling
+
+DO NOT:
+
+* add random modules
+* add new features
+* change UI direction
+* change workflow
+* change business logic
+* change existing architecture
+
+ONLY improve current implementation quality.
+
+Add proper validation everywhere in existing modules.
+
+Validate:
+
+* empty fields
+* invalid credentials
+* session expiry
+* unauthorized access
+* role-based access
+* duplicate login handling
+* secure logout
+* CSRF validation
+
+Validate all forms:
+
+1. Required fields
+2. Invalid formats
+3. Min/max lengths
+4. Invalid dates
+5. Duplicate entries
+6. Invalid numbers
+7. Invalid IDs
+8. Invalid status values
+9. Invalid AJAX requests
+
+Check:
+
+* foreign keys
+* duplicate records
+* invalid references
+* missing indexes
+* nullable issues
+* query optimization
+* unsafe queries
+
+Check and improve:
+
+1. SQL Injection prevention
+2. XSS prevention
+3. CSRF protection
+4. Session security
+5. Role validation
+6. Secure AJAX validation
+7. Direct URL access blocking
+8. Invalid request handling
+
+Validate:
+
+* request method
+* CSRF token
+* user role
+* empty responses
+* invalid JSON
+* timeout handling
+* duplicate submissions
+
+Improve:
+
+* inline validation
+* error messages
+* invalid field highlighting
+* loading states
+* toast notifications
+* empty states
+* retry states
+
+Add proper handling for:
+
+* 404 errors
+* 500 errors
+* invalid routes
+* failed database queries
+* AJAX failures
+* session expiration
+* network failures
+
+Check:
+
+* all table relationships
+* foreign key integrity
+* UUID consistency
+* soft delete consistency
+* timestamps
+* indexes
+
+Improve:
+
+* duplicated logic
+* repeated queries
+* reusable functions
+* controller cleanliness
+* model organization
+* helper usage
+
+DO NOT rewrite entire architecture unnecessarily.
+
+Check:
+
+* mobile layouts
+* tablet layouts
+* overflow issues
+* table responsiveness
+* modal responsiveness
+* sidebar responsiveness
+
+Optimize:
+
+* slow queries
+* unnecessary AJAX calls
+* duplicate requests
+* heavy loops
+* repeated database queries
+
+Verify:
+
+* popup notifications
+* polling system
+* alert dismissal
+* task alerts
+* leave alerts
+
+Verify:
+
+* score calculations
+* duplicate prevention
+* monthly calculations
+* report generation
+* role restrictions
+
+Verify:
+
+* overlapping leave prevention
+* leave date calculations
+* approval logic
+* role validation
+* leave status flow
+
+Verify:
+
+* task ownership
+* priority updates
+* incomplete alerts
+* completion logic
+* task permissions
 
 If file exists:
 
-* UPDATE existing file
+* UPDATE existing file carefully
 
 If file missing:
 
-* CREATE new file
+* CREATE only if required
 
-Do NOT duplicate logic.
-Use reusable services and components.
+Do NOT duplicate files.
+Do NOT create unnecessary modules.
 
-Leave Management system should feel like:
+The final project should feel:
 
-* modern HR management SaaS
-* enterprise employee portal
-* premium productivity platform
+* stable
+* secure
+* premium
+* production-ready
+* professionally engineered
 
-NOT:
-
-* basic leave form
-* simple CRUD page
-* outdated admin panel
+WITHOUT changing the existing product vision or adding unnecessary features.
