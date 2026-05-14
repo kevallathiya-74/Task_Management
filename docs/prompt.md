@@ -1,200 +1,227 @@
-TASK TABLE SCROLLBAR FIX — EXACT IMPLEMENTATION REQUIRED
+Use this prompt now for proper centralized `.env` architecture and environment mode switching.
+
+CENTRALIZED .ENV CONFIGURATION SYSTEM REQUIRED
 
 IMPORTANT:
-Current fix did NOT solve the issue.
+Analyze the ENTIRE project configuration system carefully.
 
-The horizontal scrollbar is STILL rendering outside the table card container at the very bottom.
+Current issue:
+Project still contains:
 
-This is NOT a styling issue only.
-This is a WRONG container structure issue.
+* hardcoded values
+* direct URLs
+* direct DB values
+* static paths
+* environment-dependent logic inside files
+* .env file in only neede value show and full update you make it 
 
-==================================================
-EXACT PROBLEM
-=============
+This is NOT production-safe.
 
-Current structure is likely:
+Create ONE centralized .env configuration system.
 
-Card Container
-├── Table
-├── Pagination
-└── Browser/Page Scrollbar
+When .env changes:
+ENTIRE project should automatically switch modes correctly.
 
-OR
+Example:
 
-overflow-x applied on WRONG parent container.
+APP_ENV=local
+→ whole project runs in LOCAL mode
 
-==================================================
-REQUIRED RESULT
-===============
+APP_ENV=production
+→ whole project runs in PRODUCTION mode
 
-The horizontal scrollbar MUST appear:
+WITHOUT:
 
-DIRECTLY BELOW TABLE ROWS
-INSIDE THE TABLE WRAPPER
-ABOVE PAGINATION
+* manual code changes
+* broken assets
+* broken URLs
+* broken database connections
+* environment conflicts
 
-Like professional SaaS dashboards.
+DO NOT use hardcoded values anywhere.
 
-==================================================
-CORRECT STRUCTURE REQUIRED
-==========================
+ALL configuration values must come from:
 
-Use EXACT structure:
+* .env file
+* centralized config loader
 
-Card Container
-├── Table Scroll Wrapper
-│     ├── Table
-│     └── Horizontal Scrollbar
-│
-└── Pagination Footer
+Remove ALL hardcoded:
 
-==================================================
-IMPORTANT FIX
-=============
+* localhost URLs
+* database credentials
+* app names
+* API URLs
+* upload paths
+* timezone values
+* session configs
+* mail configs
+* pagination limits
+* debug values
+* environment checks
+* asset URLs
 
-Apply overflow-x ONLY to the table wrapper.
+Create centralized config architecture.
 
-NOT:
+.env
+/config
+app.php
+database.php
+session.php
+constants.php
 
-* card container
-* page container
-* content wrapper
-* body
-* dashboard layout
+/core
+Env.php
+Config.php
 
-==================================================
-REQUIRED HTML STRUCTURE
-=======================
+Support modes:
 
-Use structure similar to:
+1. local
+2. production
 
-<div class="task-table-card">
+When:
+APP_ENV=local   
 
-```
-<div class="table-scroll-wrapper">
-    <table>
-        ...
-    </table>
-</div>
+Then:
 
-<div class="table-footer-pagination">
-    ...
-</div>
-```
+* debug ON
+* detailed errors visible
+* localhost URLs
+* local uploads
+* development logging
 
-</div>
+When:
+APP_ENV=production
 
-==================================================
-REQUIRED CSS FIX
-================
+Then:
 
-.table-scroll-wrapper {
-width: 100%;
-overflow-x: auto;
-overflow-y: hidden;
-display: block;
-position: relative;
-padding-bottom: 6px;
-}
+* debug OFF
+* hidden PHP errors
+* production URLs
+* secure cookies
+* optimized caching
+* production logging only
 
-.task-table-card {
-overflow: hidden;
-}
+Changing ONLY:
+.env
 
-body {
-overflow-x: hidden;
-}
+must automatically update:
 
-==================================================
-REMOVE THESE ISSUES
-===================
+* database connection
+* base URL
+* uploads
+* sessions
+* logging
+* assets
+* mail
+* app behavior
 
-Fix and remove:
+WITHOUT changing any PHP files manually.
 
-* page-level horizontal scrollbar
-* body horizontal scrolling
-* scrollbar outside card
-* huge white empty gap
-* pagination pushed downward
-* container overflow leak
-
-==================================================
-DATATABLE FIX
-=============
-
-If using DataTables:
-
-Check:
-
-* .dataTables_wrapper
-* .table-responsive
-* overflow wrappers
-
-IMPORTANT:
-DataTables may be creating extra wrapper causing scrollbar outside card.
-
-Fix DataTables wrapper structure properly.
-
-==================================================
-RESPONSIVE FIX
-==============
-
-Desktop:
-
-* scrollbar inside table card
-
-Tablet:
-
-* smooth horizontal table scroll
-
-Mobile:
-
-* responsive table wrapper
-* no body overflow
-
-==================================================
-FINAL RESULT REQUIRED
-=====================
-
-Correct layout should become:
-
-[TABLE ROWS]
-[SCROLLBAR]
-[PAGINATION]
+Database connection MUST use:
+config('database.host')
 
 NOT:
+localhost hardcoded.
 
-[TABLE ROWS]
-[EMPTY GAP]
-[PAGINATION]
-[SCROLLBAR]
+Use:
 
-==================================================
-IMPORTANT
-=========
+config('app.url')
 
-Do NOT give partial CSS fixes only.
+for:
 
-Analyze:
+* assets
+* redirects
+* AJAX URLs
+* links
+* uploads
 
-* actual DOM structure
-* overflow parent containers
-* DataTable wrappers
-* flex/grid parent behavior
+DO NOT hardcode:
+[http://localhost/](http://localhost/)
 
-Then fix properly from root cause.
+All CSS/JS/Image paths must use centralized helper:
 
-==================================================
-FINAL GOAL
-==========
+Example:
+asset('css/style.css')
 
-Task table should behave like:
+NOT:
+/assets/css/style.css hardcoded
 
-* Linear dashboard
-* modern SaaS admin panel
-* premium responsive analytics table
+Uploads must use:
+config('app.upload_path')
 
-Clean.
-Compact.
-No overflow bugs.
-Professional layout.
+NOT:
+hardcoded folders
+
+Sessions must automatically change based on environment.
+
+Production:
+
+* secure cookies ON
+* httponly ON
+
+Local:
+
+* secure cookies OFF
+
+If APP_DEBUG=true:
+
+* show detailed errors
+
+If APP_DEBUG=false:
+
+* show friendly production error page
+
+All mail configs must use .env.
+
+NO hardcoded SMTP values.
+
+Logs path and cache path must use centralized config.
+
+Create reusable helpers:
+
+env()
+config()
+asset()
+base_url()
+storage_path()
+
+If .env missing:
+
+* show proper error
+* prevent fatal crash
+
+If env key missing:
+
+* use safe fallback
+
+Protect:
+
+* .env direct access
+* sensitive config exposure
+* debug leakage in production
+
+DO NOT:
+
+* duplicate config loading
+* manually include .env everywhere
+* use global hardcoded constants randomly
+
+Load configuration ONCE centrally.
+
+If file exists:
+
+* UPDATE carefully
+
+Replace:
+
+* hardcoded values
+* static URLs
+* static configs
+
+Project should behave like:
+
+* professional SaaS architecture
+* production-ready PHP system
+* scalable environment-aware platform
+
+Changing ONLY .env should switch the ENTIRE project mode automatically without breaking anything.

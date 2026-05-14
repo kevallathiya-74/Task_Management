@@ -1,12 +1,10 @@
 <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header p-4 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-3">
-            <div class="logo-box-clean">
-                <img src="<?= url('assets/image/logo.png') ?>" alt="Logo" width="35" height="35">
-            </div>
-            <h4 class="mb-0 brand-text" style="letter-spacing: -0.5px; font-size: 1.25rem;"><b>Deckoid</b><span style="color: #6366f1;">Tasks</span></h4>
+    <div class="sidebar-header">
+        <div class="logo-wrapper">
+            <img src="<?= asset('image/logo.png') ?>" alt="Logo" width="32" height="32">
+            <h4 class="mb-0 brand-text" style="letter-spacing: -0.5px; font-size: 1.2rem;"><b>Deckoid</b><span style="color: #6366f1;">Tasks</span></h4>
         </div>
-        <button class="btn btn-link p-0 text-neutral-400 sidebar-toggle-btn d-none d-md-block" id="sidebarToggle">
+        <button class="sidebar-toggle-btn d-none d-md-flex" id="sidebarToggle">
             <i class="fas fa-chevron-left"></i>
         </button>
         <button class="btn btn-sm btn-light d-md-none border-0" id="sidebarClose">
@@ -21,19 +19,25 @@
         <ul class="nav flex-column mb-3">
             <li class="nav-item">
                 <a href="<?= url("/$prefix/dashboard") ?>" class="nav-link <?= $active_page == 'dashboard' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard">
-                    <i class="fas fa-house"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-house"></i>
+                    </div>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="<?= url("/$prefix/projects") ?>" class="nav-link <?= $active_page == 'projects' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Projects">
-                    <i class="fas fa-folder-closed"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-folder-closed"></i>
+                    </div>
                     <span>Projects</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="<?= url("/$prefix/tasks") ?>" class="nav-link <?= $active_page == 'tasks' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Tasks">
-                    <i class="fas fa-tasks"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-tasks"></i>
+                    </div>
                     <span>Tasks</span>
                 </a>
             </li>
@@ -44,19 +48,25 @@
         <ul class="nav flex-column mb-3">
             <li class="nav-item">
                 <a href="<?= url('/admin/staff') ?>" class="nav-link <?= $active_page == 'staff' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Team Members">
-                    <i class="fas fa-users"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-users"></i>
+                    </div>
                     <span>Team Members</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="<?= url('/admin/kpi') ?>" class="nav-link <?= $active_page == 'kpi' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="KPI Management">
-                    <i class="fas fa-chart-line"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
                     <span>KPI Management</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="<?= url('/admin/leaves') ?>" class="nav-link <?= $active_page == 'leaves_admin' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Leave Requests">
-                    <i class="fas fa-calendar"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-calendar"></i>
+                    </div>
                     <span>Leave Requests</span>
                 </a>
             </li>
@@ -67,14 +77,18 @@
         <ul class="nav flex-column mb-3">
             <li class="nav-item">
                 <a href="<?= url("/$prefix/profile") ?>" class="nav-link <?= $active_page == 'profile' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Account Settings">
-                    <i class="fas fa-circle-user"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-circle-user"></i>
+                    </div>
                     <span>Account Settings</span>
                 </a>
             </li>
             <?php if ($prefix == 'staff'): ?>
             <li class="nav-item">
                 <a href="<?= url("/$prefix/leaves") ?>" class="nav-link <?= $active_page == 'leaves' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="My Leaves">
-                    <i class="fas fa-calendar-day"></i>
+                    <div class="nav-icon-container">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
                     <span>My Leaves</span>
                 </a>
             </li>
@@ -97,6 +111,11 @@
 </aside>
 
 <style>
+:root {
+    --nav-icon-size: 42px;
+    --sidebar-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .sidebar {
     background: white !important;
     border-right: 1px solid var(--neutral-100);
@@ -104,61 +123,88 @@
     height: 100vh;
     position: fixed;
     z-index: 1050;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width var(--sidebar-transition), transform var(--sidebar-transition);
     display: flex;
     flex-direction: column;
     box-shadow: 10px 0 30px rgba(0,0,0,0.02);
 }
 
 .sidebar-header {
-    padding: 2rem 1.5rem;
+    height: var(--topbar-height);
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: padding var(--sidebar-transition);
 }
 
-.logo-box-clean img {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: var(--nav-icon-size);
+    justify-content: center;
 }
 
 .sidebar-content {
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
-    -ms-overflow-style: none;
     flex-grow: 1;
+    padding-top: 0.5rem;
 }
 
-.sidebar-content::-webkit-scrollbar {
-    display: none;
-}
+.sidebar-content::-webkit-scrollbar { display: none; }
 
 .sidebar-label {
-    padding: 1.5rem 1.5rem 0.5rem;
+    padding: 1.5rem 1.75rem 0.75rem;
     font-size: 0.65rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--neutral-400);
+    transition: opacity 0.3s ease, padding var(--sidebar-transition);
+}
+
+.sidebar .nav-item {
+    padding: 0 0.75rem;
+    margin-bottom: 4px;
 }
 
 .sidebar .nav-link {
-    padding: 0.85rem 1.25rem;
-    margin: 0.25rem 0.75rem;
+    height: 48px;
+    padding: 0;
+    display: flex;
+    align-items: center;
     color: var(--neutral-600);
     font-weight: 600;
     font-size: 0.9rem;
-    display: flex;
-    align-items: center;
     text-decoration: none;
     transition: all 0.2s ease;
     border-radius: 12px;
+    position: relative;
+    overflow: hidden;
 }
 
-.sidebar .nav-link i {
-    width: 24px;
-    font-size: 1.1rem;
-    margin-right: 12px;
-    text-align: center;
+.nav-icon-container {
+    width: 56px; /* Slightly wider than icon for better visual centering in expanded */
+    min-width: 56px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: min-width var(--sidebar-transition), width var(--sidebar-transition);
+}
+
+.nav-link i {
+    font-size: 1.15rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link span {
+    opacity: 1;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
 }
 
 .sidebar .nav-link:hover {
@@ -169,57 +215,95 @@
 .sidebar .nav-link.active {
     background: var(--grad-primary) !important;
     color: white !important;
-    box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
-    position: relative;
+    box-shadow: 0 8px 16px -4px rgba(139, 92, 246, 0.3);
 }
 
-.sidebar .nav-link.active i {
-    color: white !important;
+.sidebar .nav-link.active i { color: white !important; }
+
+/* --- Collapsed State --- */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
 }
 
-.sidebar .nav-link.active::after {
-    content: '';
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
+.sidebar.collapsed .sidebar-header {
+    flex-direction: column;
+    height: auto;
+    padding: 1.5rem 0;
+    gap: 15px;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn {
+    display: flex !important;
+    margin: 0 auto;
+}
+
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .brand-name-container,
+.sidebar.collapsed .logout-icon-btn {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute; /* Take out of flow to avoid layout shifts */
+}
+
+.sidebar.collapsed .nav-item {
+    padding: 0 0.5rem;
+}
+
+.sidebar.collapsed .nav-link {
+    justify-content: center;
+}
+
+.sidebar.collapsed .nav-icon-container {
+    width: 100%;
+    min-width: 100%;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn i {
+    transform: rotate(180deg);
+}
+
+/* --- Footer Section --- */
+.sidebar-footer {
+    padding: 1.25rem 0.75rem;
+    border-top: 1px solid var(--neutral-100);
 }
 
 .user-profile-card-combined {
     background: #f8fafc;
+    border-radius: 14px;
+    padding: 0.75rem;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.user-profile-card-combined:hover {
-    background: #f1f5f9;
+.sidebar.collapsed .user-profile-card-combined {
+    padding: 0.5rem;
+    justify-content: center;
+    background: transparent;
+}
+
+.sidebar.collapsed .sidebar-footer {
+    padding: 1.25rem 0.5rem;
 }
 
 .logout-icon-btn {
-    padding: 8px;
-    border-radius: 8px;
-}
-
-.logout-icon-btn:hover {
-    background: #fee2e2;
-    color: #ef4444 !important;
-}
-
-.sidebar-toggle-btn {
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    color: var(--neutral-400);
+    transition: all 0.2s ease;
 }
 
-.sidebar-toggle-btn:hover {
-    background: #f1f5f9;
+.logout-icon-btn:hover {
+    background: #fee2e2;
+    color: #ef4444 !important;
 }
 
 /* Specific Icon Colors - When NOT active */
@@ -231,56 +315,20 @@
 .nav-link:not(.active)[href*="leaves"] i { color: #f59e0b; }
 .nav-link:not(.active)[href*="profile"] i { color: #475569; }
 
-/* Collapsed State Overrides */
-.sidebar.collapsed {
-    width: var(--sidebar-collapsed-width);
-}
-
-.sidebar.collapsed .sidebar-label,
-.sidebar.collapsed .nav-link span,
-.sidebar.collapsed .brand-text,
-.sidebar.collapsed .brand-name-container,
-.sidebar.collapsed .nav-link.active::after {
-    display: none;
-}
-
-.sidebar.collapsed .sidebar-header {
-    justify-content: space-between;
-    padding: 1.5rem 1rem !important;
-}
-
-.sidebar.collapsed .logo-box-clean {
+.sidebar-toggle-btn {
+    width: 32px;
+    height: 32px;
     display: flex;
+    align-items: center;
     justify-content: center;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: var(--neutral-500);
+    transition: all 0.3s ease;
 }
 
-.sidebar.collapsed .sidebar-toggle-btn {
-    display: flex !important;
-    justify-content: center;
+.sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: var(--primary-600);
 }
-
-.sidebar.collapsed .nav-link {
-    justify-content: center;
-    padding: 0.85rem;
-    margin: 0.25rem 0.5rem;
-}
-
-.sidebar.collapsed .nav-link i {
-    margin-right: 0 !important;
-}
-
-.sidebar.collapsed .user-profile-card-combined {
-    padding: 0.5rem !important;
-    justify-content: center;
-}
-
-.sidebar.collapsed .logout-icon-btn {
-    display: none;
-}
-
-.sidebar.collapsed .sidebar-toggle-btn i {
-    transform: rotate(180deg);
-}
-
-.brand-text b { font-weight: 800; }
 </style>

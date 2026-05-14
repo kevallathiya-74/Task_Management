@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($title) ? $title . ' - ' : '' ?>Task Management System</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?= asset('image/logo.png') ?>">
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,8 +26,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= url('assets/css/tokens.css') ?>">
-    <link rel="stylesheet" href="<?= url('assets/css/style.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/tokens.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/style.css') ?>">
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -49,7 +52,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="<?= url('assets/js/main.js') ?>"></script>
+    <script src="<?= asset('js/main.js') ?>"></script>
     
     <?php if (isset($extra_css)): ?>
         <?= $extra_css ?>

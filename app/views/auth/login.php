@@ -174,7 +174,7 @@
             <div class="brand-text"><b>Deckoid</b><span>Tasks</span></div>
         </div>
         
-        <form id="loginForm" action="<?= url('/api/auth/login') ?>" method="POST">
+        <form id="loginForm" action="<?= url('/api/auth/login') ?>" method="POST" data-no-toast="true">
             <div class="mb-2">
                 <span class="input-label">Username</span>
                 <div class="custom-input-group">
@@ -208,11 +208,7 @@
     $(document).ready(function() {
         handleFormSubmit('#loginForm', function(response) {
             if (response.redirect) {
-                // Subtle feedback for login success
-                $('.login-card').css('transition', 'all 0.5s ease').css('transform', 'scale(0.95)').css('opacity', '0.5');
-                setTimeout(function() {
-                    window.location.href = response.redirect;
-                }, 800);
+                window.location.href = response.redirect;
             }
         });
     });

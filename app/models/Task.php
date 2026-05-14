@@ -16,7 +16,14 @@ class Task
     public function listAll($filters = [])
     {
         $sql = "
-            SELECT t.*, p.project_name, u.full_name as assigned_to_name, r.name as role_name
+            SELECT 
+                t.id, t.project_id, t.assigned_to, t.role_id, t.title, t.description, 
+                t.status, t.is_completed, t.is_incomplete, t.status_notes, 
+                t.progress_percentage, t.due_date, t.due_time, t.priority, 
+                t.completed_at, t.admin_alert_sent, t.created_at, t.updated_at,
+                p.project_name, p.client_name,
+                u.full_name as assigned_to_name, 
+                r.name as role_name
             FROM tasks t
             JOIN projects p ON t.project_id = p.id
             JOIN users u ON t.assigned_to = u.id
@@ -56,8 +63,8 @@ class Task
     {
         $id = $this->generateUuid();
         $stmt = $this->db->prepare("
-            INSERT INTO tasks (id, project_id, assigned_to, role_id, title, description, status, due_date, due_time, priority, is_completed, is_incomplete, admin_alert_sent) 
-            VALUES (:id, :project_id, :assigned_to, :role_id, :title, :description, :status, :due_date, :due_time, :priority, :is_completed, :is_incomplete, :admin_alert_sent)
+            INSERT INTO `tasks` (`id`, `project_id`, `assigned_to`, `role_id`, `title`, `description`, `status`, `due_date`, `due_time`, `priority`, `progress_percentage`, `status_notes`, `is_completed`, `is_incomplete`, `admin_alert_sent`) 
+            VALUES (:id, :project_id, :assigned_to, :role_id, :title, :description, :status, :due_date, :due_time, :priority, :progress_percentage, :status_notes, :is_completed, :is_incomplete, :admin_alert_sent)
         ");
         
         $result = $stmt->execute([
@@ -71,6 +78,8 @@ class Task
             'due_date' => $data['due_date'],
             'due_time' => $data['due_time'] ?? null,
             'priority' => $data['priority'] ?? 'medium',
+            'progress_percentage' => $data['progress_percentage'] ?? 0,
+            'status_notes' => $data['status_notes'] ?? null,
             'is_completed' => $data['is_completed'] ?? 0,
             'is_incomplete' => $data['is_incomplete'] ?? 0,
             'admin_alert_sent' => $data['admin_alert_sent'] ?? 0
@@ -82,22 +91,23 @@ class Task
     public function update($id, $data)
     {
         $stmt = $this->db->prepare("
-            UPDATE tasks SET 
-                assigned_to = :assigned_to,
-                role_id = :role_id,
-                title = :title,
-                description = :description,
-                status = :status,
-                due_date = :due_date,
-                due_time = :due_time,
-                priority = :priority,
-                is_completed = :is_completed,
-                is_incomplete = :is_incomplete,
-                completed_at = :completed_at,
-                admin_alert_sent = :admin_alert_sent,
-                progress_percentage = :progress,
-                status_notes = :notes
-            WHERE id = :id
+            UPDATE `tasks` SET 
+                `assigned_to` = :assigned_to,
+                `role_id` = :role_id,
+                `title` = :title,
+                `description` = :description,
+                `status` = :status,
+                `due_date` = :due_date,
+                `due_time` = :due_time,
+                `priority` = :priority,
+                `is_completed` = :is_completed,
+                `is_incomplete` = :is_incomplete,
+                `completed_at` = :completed_at,
+                `admin_alert_sent` = :admin_alert_sent,
+                `progress_percentage` = :progress,
+                `status_notes` = :notes,
+                `project_id` = :project_id
+            WHERE `id` = :id
         ");
         
         return $stmt->execute([
@@ -115,7 +125,8 @@ class Task
             'completed_at' => $data['completed_at'] ?? null,
             'admin_alert_sent' => $data['admin_alert_sent'] ?? 0,
             'progress' => $data['progress_percentage'] ?? 0,
-            'notes' => $data['status_notes'] ?? null
+            'notes' => $data['status_notes'] ?? null,
+            'project_id' => $data['project_id']
         ]);
     }
 

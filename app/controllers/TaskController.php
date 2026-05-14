@@ -68,41 +68,61 @@ class TaskController
         AuthMiddleware::adminOnly();
         header('Content-Type: application/json');
 
+        $tasksData = $_POST['tasks'] ?? [];
+
+        if (empty($tasksData) || !is_array($tasksData)) {
+            echo json_encode(['success' => false, 'message' => 'No task data provided']);
+            return;
+        }
+
         try {
-            $data = [
-                'project_id' => $_POST['project_id'] ?? '',
-                'assigned_to' => $_POST['assigned_to'] ?? '',
-                'role_id' => $_POST['role_id'] ?? '',
-                'title' => trim($_POST['title'] ?? ''),
-                'description' => trim($_POST['description'] ?? ''),
-                'due_date' => (!empty($_POST['due_date']) && !empty($_POST['due_time'])) ? $_POST['due_date'] . ' ' . $_POST['due_time'] : date('Y-m-d H:i'),
-                'due_time' => $_POST['due_time'] ?? '09:00',
-                'priority' => $_POST['priority'] ?? 'medium',
-                'status' => $_POST['status'] ?? 'pending'
-            ];
+            $db = \App\Core\Database::getInstance()->getConnection();
+            $db->beginTransaction();
 
-            if (empty($data['project_id']) || empty($data['assigned_to']) || empty($data['title'])) {
-                echo json_encode(['success' => false, 'message' => 'Project, Assignee, and Title are required']);
-                return;
+            $createdCount = 0;
+            foreach ($tasksData as $index => $rawTask) {
+                $data = [
+                    'project_id' => $rawTask['project_id'] ?? '',
+                    'assigned_to' => $rawTask['assigned_to'] ?? '',
+                    'role_id' => $rawTask['role_id'] ?? '',
+                    'title' => trim($rawTask['title'] ?? ''),
+                    'description' => trim($rawTask['description'] ?? ''),
+                    'due_date' => (!empty($rawTask['due_date'])) ? $rawTask['due_date'] . ' ' . ($rawTask['due_time'] ?? '09:00') : date('Y-m-d H:i:s'),
+                    'due_time' => $rawTask['due_time'] ?? '09:00',
+                    'priority' => $rawTask['priority'] ?? 'medium',
+                    'status' => $rawTask['status'] ?? 'pending',
+                    'progress_percentage' => $rawTask['progress_percentage'] ?? 0,
+                    'status_notes' => trim($rawTask['status_notes'] ?? '')
+                ];
+
+                if (empty($data['project_id']) || empty($data['assigned_to']) || empty($data['title'])) {
+                    throw new \Exception("Task #" . ($index + 1) . ": Project, Assignee, and Title are required");
+                }
+
+                // Verify existence
+                if (!$this->projectModel->findById($data['project_id'])) {
+                    throw new \Exception("Task #" . ($index + 1) . ": Invalid project selected");
+                }
+                if (!$this->userModel->findById($data['assigned_to'])) {
+                    throw new \Exception("Task #" . ($index + 1) . ": Invalid assignee selected");
+                }
+
+                if (!$this->taskModel->create($data)) {
+                    throw new \Exception("Task #" . ($index + 1) . ": Failed to create task record");
+                }
+                $createdCount++;
             }
 
-            // Verify existence
-            if (!$this->projectModel->findById($data['project_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Invalid project selected']);
-                return;
-            }
-            if (!$this->userModel->findById($data['assigned_to'])) {
-                echo json_encode(['success' => false, 'message' => 'Invalid assignee selected']);
-                return;
-            }
-
-            $id = $this->taskModel->create($data);
-            if ($id) {
-                echo json_encode(['success' => true, 'message' => 'Task created successfully']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to create task']);
-            }
+            $db->commit();
+            echo json_encode([
+                'success' => true, 
+                'message' => $createdCount . ' task(s) created successfully'
+            ]);
         } catch (\Exception $e) {
+            $db = \App\Core\Database::getInstance()->getConnection();
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -131,6 +151,7 @@ class TaskController
             }
 
             $data = [
+                'project_id' => $_POST['project_id'] ?? $task['project_id'],
                 'assigned_to' => $_POST['assigned_to'] ?? $task['assigned_to'],
                 'role_id' => $_POST['role_id'] ?? $task['role_id'],
                 'title' => trim($_POST['title'] ?? $task['title']),
@@ -149,6 +170,7 @@ class TaskController
 
             // If not admin, restrict certain fields
             if ($_SESSION['user_role'] !== 'admin') {
+                $data['project_id'] = $task['project_id'];
                 $data['assigned_to'] = $task['assigned_to'];
                 $data['role_id'] = $task['role_id'];
                 $data['title'] = $task['title'];

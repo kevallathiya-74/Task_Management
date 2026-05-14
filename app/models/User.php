@@ -27,6 +27,19 @@ class User
         return $stmt->fetch();
     }
 
+    public function findByEmail($email)
+    {
+        $stmt = $this->db->prepare("
+            SELECT u.*, r.slug as role_slug, r.name as role_name 
+            FROM users u 
+            JOIN roles r ON u.role_id = r.id 
+            WHERE u.email = :email AND u.deleted_at IS NULL 
+            LIMIT 1
+        ");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }
+
     public function findById($id)
     {
         $stmt = $this->db->prepare("

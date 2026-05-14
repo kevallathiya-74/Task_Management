@@ -29,11 +29,24 @@ $(document).ready(function() {
 
     if (toggler.length) {
         toggler.on('click', function() {
+            // Immediately hide any active tooltips to prevent "sticking" during animation
+            $('[data-bs-toggle="tooltip"]').tooltip('hide');
+            
             if ($(window).width() > 992) {
                 sidebar.toggleClass('collapsed');
                 mainContent.toggleClass('expanded');
+                $('.top-bar').toggleClass('expanded');
                 localStorage.setItem('sidebarCollapsed', sidebar.hasClass('collapsed'));
-                updateSidebarTooltips();
+                
+                // Recalculate DataTables layout if it exists
+                if (typeof table !== 'undefined') {
+                    setTimeout(() => {
+                        table.columns.adjust().draw();
+                    }, 400); // Increased delay to match 0.4s transition
+                }
+                
+                // Small delay to re-evaluate tooltips after animation starts/finishes
+                setTimeout(updateSidebarTooltips, 400);
             } else {
                 sidebar.toggleClass('active');
                 if (sidebar.hasClass('active')) {
@@ -114,6 +127,7 @@ function handleFormSubmit(formId, successCallback, errorCallback) {
         const form = $(this);
         const submitBtn = form.find('button[type="submit"]');
         const originalBtnText = submitBtn.html();
+        const showToast = form.data('no-toast') !== true;
         
         // Show loading state
         submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Loading...');
@@ -127,7 +141,9 @@ function handleFormSubmit(formId, successCallback, errorCallback) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    toastr.success(response.message);
+                    if (showToast) {
+                        toastr.success(response.message);
+                    }
                     if (successCallback) successCallback(response);
                 } else {
                     toastr.error(response.message || 'Something went wrong');

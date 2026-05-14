@@ -12,13 +12,16 @@ class Database
 
     private function __construct()
     {
-        $host = env('DB_HOST', '127.0.0.1');
-        $db = env('DB_DATABASE', 'task_management');
-        $user = env('DB_USERNAME', 'root');
-        $pass = env('DB_PASSWORD', '');
-        $charset = env('DB_CHARSET', 'utf8mb4');
+        $config = config('database.connections.mysql');
+        
+        $host = $config['host'] ?? '127.0.0.1';
+        $db = $config['database'] ?? '';
+        $user = $config['username'] ?? 'root';
+        $pass = $config['password'] ?? '';
+        $charset = $config['charset'] ?? 'utf8mb4';
+        $port = $config['port'] ?? '3306';
 
-        $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+        $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -28,7 +31,7 @@ class Database
         try {
             $this->connection = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
-            if (env('APP_DEBUG', false)) {
+            if (config('app.debug', false)) {
                 die("Database connection failed: " . $e->getMessage());
             } else {
                 die("Database connection failed. Please contact administrator.");

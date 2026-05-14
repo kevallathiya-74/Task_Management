@@ -5,14 +5,14 @@
  */
 function url($path = '')
 {
-    $baseUrl = env('APP_URL', 'http://localhost/Task_Management');
+    $baseUrl = config('app.url', 'http://localhost');
     $path = ltrim($path, '/');
     return rtrim($baseUrl, '/') . ($path ? '/' . $path : '');
 }
 
 function asset($path)
 {
-    return url('public/' . ltrim($path, '/'));
+    return url('assets/' . ltrim($path, '/'));
 }
 
 function redirect($path)
