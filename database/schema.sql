@@ -218,7 +218,7 @@ INSERT IGNORE INTO roles (id, name, slug) VALUES
 ('3b4c5d6e-7f8a-4b9c-bd0e-1f2a3b4c5d6e', 'AI Video Making', 'ai_video'),
 ('20e3f4a5-6b7c-8d9e-a0b1-c2d3e4f5a6b7', 'Client Management', 'client_management');
 
--- Seed Super Admin User (Default Password: password123)
+-- Seed Super Admin User (Default Password: 1234)
 -- Note: Replace password_hash with a secure bcrypt hash in production.
 INSERT IGNORE INTO users (id, role_id, role, full_name, username, email, password_hash, status) VALUES 
-('e3e3e3e3-e3e3-4e3e-a3e3-e3e3e3e3e3e3', '6f9e836b-67a4-4770-96f1-67e39a5f4581', 'admin', 'Super Admin', 'admin', 'admin@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'active');
+('e3e3e3e3-e3e3-4e3e-a3e3-e3e3e3e3e3e3', '6f9e836b-67a4-4770-96f1-67e39a5f4581', 'admin', 'Super Admin', 'admin', 'admin@gmail.com', '$2y$10$wOTOd2Oyot/MX4GCAIQm7uIc/BsKb6w81/e20SK.CDLoYzjQRIdny', 'active');
