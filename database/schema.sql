@@ -208,7 +208,8 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 -- Seed Roles
 INSERT IGNORE INTO roles (id, name, slug) VALUES 
 ('6f9e836b-67a4-4770-96f1-67e39a5f4581', 'Admin', 'admin'),
-('b5c3e6d2-7f1a-4d9e-8c3b-5a6f9e7d2c1b', 'Facebook & Google Ads', 'ads'),
+('b5c3e6d2-7f1a-4d9e-8c3b-5a6f9e7d2c1b', 'Facebook Ads', 'facebook_ads'),
+('c6d4f7e3-8f2b-5e0f-9d4c-6b7a0f8e3d2c', 'Google Ads', 'google_ads'),
 ('d4f2a1b7-e9c3-4a8d-b7f1-2c6e9a3d4f5b', 'Website Design & Development', 'web_dev'),
 ('a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', 'Graphics Design', 'graphics'),
 ('f5e4d3c2-b1a0-4f9e-8d7c-6b5a4f3e2d1c', 'Search Engine Optimization', 'seo'),
