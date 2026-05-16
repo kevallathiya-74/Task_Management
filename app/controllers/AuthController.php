@@ -27,7 +27,7 @@ class AuthController
         $password = $_POST['password'] ?? '';
 
         if (empty($username) || empty($password)) {
-            echo json_encode(['success' => false, 'message' => 'Username and password are required']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Username and password are required']);
             return;
         }
 
@@ -36,7 +36,7 @@ class AuthController
 
         if ($user && password_verify($password, $user['password_hash'])) {
             if ($user['status'] !== 'active') {
-                echo json_encode(['success' => false, 'message' => 'Account is inactive. Please contact admin.']);
+                echo json_encode(['status' => 'error', 'message' => 'Account is inactive. Please contact admin.']);
                 return;
             }
 
@@ -57,12 +57,12 @@ class AuthController
 
             $prefix = ($user['role_slug'] === 'admin') ? 'admin' : 'staff';
             echo json_encode([
-                'success' => true, 
+                'status' => 'success', 
                 'message' => 'Login successful! Redirecting...',
                 'redirect' => url("/$prefix/dashboard")
             ]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Invalid username or password']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid username or password']);
         }
     }
 

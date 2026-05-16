@@ -40,6 +40,8 @@ class DashboardController
         // Fetch Recent Activities
         $recent_tasks = $this->getRecentTasks();
 
+
+
         require_once ROOT_PATH . '/app/views/layouts/header.php';
         require_once ROOT_PATH . '/app/views/layouts/sidebar.php';
         require_once ROOT_PATH . '/app/views/dashboard/index.php';

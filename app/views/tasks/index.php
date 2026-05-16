@@ -8,14 +8,17 @@
                 <h2 class="fw-bold text-neutral-900 mb-1 font-outfit">Task Management</h2>
                 <p class="text-neutral-500 mb-0 fw-medium">Track and manage project tasks and assignments</p>
             </div>
-            <button type="button" class="btn btn-primary-grad rounded-pill px-4 py-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
-                <div class="d-flex align-items-center">
-                    <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 28px; height: 28px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                        <i class="fas fa-plus text-white" style="font-size: 0.85rem;"></i>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-primary-grad rounded-pill px-4 py-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 28px; height: 28px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                            <i class="fas fa-plus text-white" style="font-size: 0.85rem;"></i>
+                        </div>
+                        <span class="fw-bold text-white">Create Task</span>
                     </div>
-                    <span class="fw-bold text-white">Create Task</span>
-                </div>
-            </button>
+                </button>
+
+            </div>
         </div>
 
         <!-- Dynamic Filters -->
@@ -81,11 +84,11 @@
                 <thead>
                     <tr>
                         <th class="ps-4 text-xs fw-bold text-uppercase text-neutral-400">Task Details</th>
-                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Project</th>
-                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Assignee To</th>
-                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Priority</th>
                         <th class="text-xs fw-bold text-uppercase text-neutral-400">Status</th>
                         <th class="text-xs fw-bold text-uppercase text-neutral-400">Deadline</th>
+                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Priority</th>
+                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Assignee To</th>
+                        <th class="text-xs fw-bold text-uppercase text-neutral-400">Project</th>
                         <th class="text-end pe-4 text-xs fw-bold text-uppercase text-neutral-400">Actions</th>
                     </tr>
                 </thead>
@@ -331,6 +334,8 @@
     </div>
 </div>
 
+
+
 <!-- Recurring History Modal -->
 <div class="modal fade" id="recurringHistoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -368,7 +373,7 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     let recurringBadge = '';
                     if (row.is_recurring == 1) {
-                        const typeLabel = row.recurring_type === 'weekly' ? 'Weekly Repeat' : 'Monthly Repeat';
+                        const typeLabel = row.recurring_type === 'daily' ? 'Daily Repeat' : (row.recurring_type === 'weekly' ? 'Weekly Repeat' : 'Monthly Repeat');
                         recurringBadge = `<span class="badge bg-purple-grad rounded-pill px-2 py-1 ms-2 text-white" style="font-size: 0.6rem;"><i class="fas fa-sync-alt me-1"></i>${typeLabel}</span>`;
                     }
                     return `
@@ -380,50 +385,6 @@ $(document).ready(function() {
                             <div class="text-xs text-neutral-400 font-medium text-truncate" style="max-width: 280px;">${row.description || 'No detailed description provided'}</div>
                         </div>
                     `;
-                }
-            },
-            { 
-                data: 'project_name',
-                render: function(data, type, row) {
-                    const name = data || '[ No Project ]';
-                    const client = row.client_name || 'Internal';
-                    return `
-                        <div class="py-1">
-                            <div class="text-neutral-900 fw-bold font-outfit text-sm mb-1">${name}</div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-primary-soft text-primary p-0 me-2" style="font-size: 0.6rem; background: transparent !important;"><i class="fas fa-building me-1"></i></span>
-                                <span class="text-xs text-neutral-400 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.05em;">${client}</span>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            { 
-                data: 'assigned_to_name',
-                render: function(data, type, row) {
-                    const name = data || 'Unassigned';
-                    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                    return `
-                        <div class="d-flex align-items-center py-2">
-                            <div class="rounded-circle bg-primary-grad text-white d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm border border-2 border-white" style="width: 40px; height: 40px; min-width: 40px; font-size: 0.8rem;">
-                                ${initials}
-                            </div>
-                            <div class="d-flex flex-column justify-content-center">
-                                <div class="fw-bold text-neutral-900 font-outfit text-sm lh-1 mb-1">${name}</div>
-                                <div class="text-xs text-neutral-400 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.02em;">${row.role_name || 'Member'}</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            { 
-                data: 'priority',
-                render: function(data) {
-                    let cls = 'bg-primary-soft text-primary';
-                    let icon = 'fa-circle-info';
-                    if (data === 'high') { cls = 'bg-danger-soft text-danger'; icon = 'fa-fire-flame-curved'; }
-                    if (data === 'medium') { cls = 'bg-warning-soft text-warning'; icon = 'fa-clock'; }
-                    return `<span class="badge ${cls} rounded-pill px-3 py-2 font-outfit fw-bold border-0 shadow-sm" style="font-size: 0.7rem; min-width: 90px; display: inline-flex; align-items: center; justify-content: center;"><i class="fas ${icon} me-2" style="font-size: 0.8rem;"></i>${data}</span>`;
                 }
             },
             { 
@@ -453,7 +414,6 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     if (!data) return '<span class="text-neutral-400">No Date</span>';
                     
-                    // Robust date parsing
                     const datePart = data.split(' ')[0];
                     const timePart = row.due_time ? (row.due_time.includes(':') ? row.due_time : row.due_time + ':00') : '09:00';
                     const target = moment(datePart + ' ' + timePart);
@@ -473,6 +433,50 @@ $(document).ready(function() {
                     `;
                 }
             },
+            { 
+                data: 'priority',
+                render: function(data) {
+                    let cls = 'bg-primary-soft text-primary';
+                    let icon = 'fa-circle-info';
+                    if (data === 'high') { cls = 'bg-danger-soft text-danger'; icon = 'fa-fire-flame-curved'; }
+                    if (data === 'medium') { cls = 'bg-warning-soft text-warning'; icon = 'fa-clock'; }
+                    return `<span class="badge ${cls} rounded-pill px-3 py-2 font-outfit fw-bold border-0 shadow-sm" style="font-size: 0.7rem; min-width: 90px; display: inline-flex; align-items: center; justify-content: center;"><i class="fas ${icon} me-2" style="font-size: 0.8rem;"></i>${data}</span>`;
+                }
+            },
+            { 
+                data: 'assigned_to_name',
+                render: function(data, type, row) {
+                    const name = data || 'Unassigned';
+                    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    return `
+                        <div class="d-flex align-items-center py-2">
+                            <div class="rounded-circle bg-primary-grad text-white d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm border border-2 border-white" style="width: 40px; height: 40px; min-width: 40px; font-size: 0.8rem;">
+                                ${initials}
+                            </div>
+                            <div class="d-flex flex-column justify-content-center">
+                                <div class="fw-bold text-neutral-900 font-outfit text-sm lh-1 mb-1">${name}</div>
+                                <div class="text-xs text-neutral-400 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.02em;">${row.role_name || 'Member'}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            { 
+                data: 'project_name',
+                render: function(data, type, row) {
+                    const name = data || '[ No Project ]';
+                    const client = row.client_name || 'Internal';
+                    return `
+                        <div class="py-1">
+                            <div class="text-neutral-900 fw-bold font-outfit text-sm mb-1">${name}</div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary-soft text-primary p-0 me-2" style="font-size: 0.6rem; background: transparent !important;"><i class="fas fa-building me-1"></i></span>
+                                <span class="text-xs text-neutral-400 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.05em;">${client}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
             {
                 data: null,
                 className: 'text-end pe-4',
@@ -485,6 +489,7 @@ $(document).ready(function() {
                         recurringActions = `
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header text-xs text-uppercase fw-bold text-neutral-400">Automation</h6></li>
+                            <li><a class="dropdown-item py-2 text-sm fw-medium enable-recurring" href="javascript:void(0)" data-id="${row.id}" data-type="daily"><i class="fas fa-calendar-day me-2 text-purple-500"></i>Repeat Daily</a></li>
                             <li><a class="dropdown-item py-2 text-sm fw-medium enable-recurring" href="javascript:void(0)" data-id="${row.id}" data-type="weekly"><i class="fas fa-calendar-week me-2 text-purple-500"></i>Repeat Weekly</a></li>
                             <li><a class="dropdown-item py-2 text-sm fw-medium enable-recurring" href="javascript:void(0)" data-id="${row.id}" data-type="monthly"><i class="fas fa-calendar-alt me-2 text-purple-500"></i>Repeat Monthly</a></li>
                             ${row.is_recurring == 1 ? `<li><a class="dropdown-item py-2 text-sm fw-medium disable-recurring text-danger" href="javascript:void(0)" data-id="${row.id}"><i class="fas fa-stop-circle me-2"></i>Disable Repeat</a></li>` : ''}
@@ -494,7 +499,7 @@ $(document).ready(function() {
 
                     return `
                         <div class="dropdown">
-                            <button class="btn action-btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn action-btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-display="static">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end glass-card border-0 shadow-lg py-2 animate-fade-in" style="min-width: 200px;">
@@ -628,7 +633,8 @@ $(document).ready(function() {
 
     $(document).on('click', '.edit-task', function(e) {
         const trigger = e.currentTarget;
-        const data = table.row($(this).closest('tr')).data();
+        const $tr = $(this).closest('.dropdown-menu').data('original-tr') || $(this).closest('tr');
+        const data = table.row($tr).data();
         $('#edit_id').val(data.id);
         $('#edit_project_id').val(data.project_id);
         $('#edit_title').val(data.title);
@@ -671,8 +677,14 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post('<?= url('/api/tasks/delete') ?>', { id: id }, (res) => {
-                    if (res.success) { toastr.success(res.message); table.ajax.reload(null, false); }
-                    else { toastr.error(res.message); }
+                    if (res.status === 'success' || res.success) { 
+                        toastr.success(res.message || 'Task deleted'); 
+                        table.ajax.reload(null, false); 
+                    } else { 
+                        toastr.error(res.message || 'Failed to delete task'); 
+                    }
+                }).fail((xhr) => {
+                    toastr.error(xhr.responseJSON?.message || 'An error occurred');
                 });
             }
         });
@@ -686,7 +698,7 @@ $(document).ready(function() {
 
         Swal.fire({
             title: `Enable ${typeLabel} Repeat?`,
-            text: `This will automatically create a new task every ${type === 'weekly' ? 'week' : 'month'}.`,
+            text: `This will automatically create a new task every ${type === 'daily' ? 'day' : (type === 'weekly' ? 'week' : 'month')}.`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#8b5cf6',
@@ -694,12 +706,14 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post('<?= url('/api/tasks/recurring/enable') ?>', { id: id, type: type }, (res) => {
-                    if (res.success) {
+                    if (res.status === 'success' || res.success) {
                         toastr.success(res.message);
                         table.ajax.reload(null, false);
                     } else {
                         toastr.error(res.message);
                     }
+                }).fail((xhr) => {
+                    toastr.error(xhr.responseJSON?.message || 'An error occurred');
                 });
             }
         });
@@ -718,12 +732,14 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post('<?= url('/api/tasks/recurring/disable') ?>', { id: id }, (res) => {
-                    if (res.success) {
+                    if (res.status === 'success' || res.success) {
                         toastr.success(res.message);
                         table.ajax.reload(null, false);
                     } else {
                         toastr.error(res.message);
                     }
+                }).fail((xhr) => {
+                    toastr.error(xhr.responseJSON?.message || 'An error occurred');
                 });
             }
         });
@@ -737,7 +753,7 @@ $(document).ready(function() {
         $('#recurringHistoryModal').modal('show');
 
         $.get('<?= url('/api/tasks/recurring/logs') ?>', { id: id }, (res) => {
-            if (res.success && res.data.length > 0) {
+            if ((res.status === 'success' || res.success) && res.data && res.data.length > 0) {
                 let html = '<div class="list-group list-group-flush">';
                 res.data.forEach(log => {
                     html += `
@@ -764,6 +780,8 @@ $(document).ready(function() {
                     </div>
                 `);
             }
+        }).fail((xhr) => {
+            container.html('<div class="text-center py-4 text-danger">Failed to load history</div>');
         });
     });
 });

@@ -61,29 +61,29 @@ class LeaveController
 
         // Hardened Validation
         if (empty($data['leave_type']) || empty($data['from_date']) || empty($data['to_date']) || strlen($data['reason']) < 10) {
-            echo json_encode(['success' => false, 'message' => 'Please fill all fields correctly. Reason must be at least 10 chars.']);
+            echo json_encode(['status' => 'error', 'message' => 'Please fill all fields correctly. Reason must be at least 10 chars.']);
             return;
         }
 
         if (strtotime($data['from_date']) < strtotime(date('Y-m-d'))) {
-            echo json_encode(['success' => false, 'message' => 'Start date cannot be in the past']);
+            echo json_encode(['status' => 'error', 'message' => 'Start date cannot be in the past']);
             return;
         }
 
         if (strtotime($data['to_date']) < strtotime($data['from_date'])) {
-            echo json_encode(['success' => false, 'message' => 'End date cannot be before start date']);
+            echo json_encode(['status' => 'error', 'message' => 'End date cannot be before start date']);
             return;
         }
 
         if ($this->leaveModel->hasOverlap($data['user_id'], $data['from_date'], $data['to_date'])) {
-            echo json_encode(['success' => false, 'message' => 'Leave request already exists for selected dates.']);
+            echo json_encode(['status' => 'error', 'message' => 'Leave request already exists for selected dates.']);
             return;
         }
 
         if ($this->leaveModel->create($data)) {
-            echo json_encode(['success' => true, 'message' => 'Leave request submitted successfully.']);
+            echo json_encode(['status' => 'success', 'message' => 'Leave request submitted successfully.']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to submit request.']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to submit request.']);
         }
     }
 
@@ -97,14 +97,14 @@ class LeaveController
         $comment = trim($_POST['admin_comment'] ?? '');
 
         if (!$id || !in_array($status, ['approved', 'rejected'])) {
-            echo json_encode(['success' => false, 'message' => 'Invalid status or missing ID.']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid status or missing ID.']);
             return;
         }
 
         if ($this->leaveModel->updateStatus($id, $status, $_SESSION['user_id'], $comment)) {
-            echo json_encode(['success' => true, 'message' => 'Leave request ' . $status . ' successfully.']);
+            echo json_encode(['status' => 'success', 'message' => 'Leave request ' . $status . ' successfully.']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Update failed.']);
+            echo json_encode(['status' => 'error', 'message' => 'Update failed.']);
         }
     }
 
@@ -114,14 +114,14 @@ class LeaveController
         $id = $_POST['id'] ?? '';
         
         if (empty($id)) {
-            echo json_encode(['success' => false, 'message' => 'Request ID is missing']);
+            echo json_encode(['status' => 'error', 'message' => 'Request ID is missing']);
             return;
         }
 
         if ($this->leaveModel->cancel($id, $_SESSION['user_id'])) {
-            echo json_encode(['success' => true, 'message' => 'Leave request cancelled.']);
+            echo json_encode(['status' => 'success', 'message' => 'Leave request cancelled.']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Cancellation failed.']);
+            echo json_encode(['status' => 'error', 'message' => 'Cancellation failed.']);
         }
     }
 
@@ -134,6 +134,6 @@ class LeaveController
             'user_id' => $_GET['user_id'] ?? ''
         ];
         $leaves = $this->leaveModel->listAll($filters);
-        echo json_encode(['success' => true, 'data' => $leaves]);
+        echo json_encode(['status' => 'success', 'data' => $leaves]);
     }
 }

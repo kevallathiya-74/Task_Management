@@ -42,7 +42,7 @@ class StaffController
         $staff = $this->userModel->listAll($filters);
         
         echo json_encode([
-            'success' => true,
+            'status' => 'success',
             'data' => $staff
         ]);
     }
@@ -62,48 +62,48 @@ class StaffController
 
         // Robust Validation
         if (empty($data['full_name']) || empty($data['username']) || empty($data['email']) || empty($data['password']) || empty($data['role_id'])) {
-            echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'All required fields must be filled']);
             return;
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Invalid email format']);
             return;
         }
 
         if (!preg_match('/^[a-zA-Z0-9._]{3,20}$/', $data['username'])) {
-            echo json_encode(['success' => false, 'message' => 'Username must be 3-20 characters (alphanumeric, dots, underscores)']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Username must be 3-20 characters (alphanumeric, dots, underscores)']);
             return;
         }
 
         if (strlen($data['password']) < 6) {
-            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Password must be at least 6 characters']);
             return;
         }
 
         $role = $this->roleModel->findById($data['role_id']);
         if (!$role) {
-            echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Invalid department selected']);
             return;
         }
         $data['role'] = $role['name'];
 
         // Check if username or email exists
         if ($this->userModel->findByUsername($data['username'])) {
-            echo json_encode(['success' => false, 'message' => 'Username already exists']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Username already exists']);
             return;
         }
 
         if ($this->userModel->findByEmail($data['email'])) {
-            echo json_encode(['success' => false, 'message' => 'Email address already registered']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Email address already registered']);
             return;
         }
 
         $id = $this->userModel->create($data);
         if ($id) {
-            echo json_encode(['success' => true, 'message' => 'Staff member created successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Staff member created successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to create staff member']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to create staff member']);
         }
     }
 
@@ -113,7 +113,7 @@ class StaffController
 
         $id = $_POST['id'] ?? '';
         if (empty($id)) {
-            echo json_encode(['success' => false, 'message' => 'Staff ID is missing']);
+            echo json_encode(['status' => 'error', 'message' => 'Staff ID is missing']);
             return;
         }
 
@@ -127,26 +127,26 @@ class StaffController
         ];
 
         if (empty($data['full_name']) || empty($data['username']) || empty($data['email']) || empty($data['role_id'])) {
-            echo json_encode(['success' => false, 'message' => 'All required fields must be filled']);
+            echo json_encode(['status' => 'error', 'message' => 'All required fields must be filled']);
             return;
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid email format']);
             return;
         }
 
         $role = $this->roleModel->findById($data['role_id']);
         if (!$role) {
-            echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid department selected']);
             return;
         }
         $data['role'] = $role['name'];
 
         if ($this->userModel->update($id, $data)) {
-            echo json_encode(['success' => true, 'message' => 'Staff member updated successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Staff member updated successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to update staff member']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update staff member']);
         }
     }
 
@@ -156,20 +156,20 @@ class StaffController
 
         $id = $_POST['id'] ?? '';
         if (empty($id)) {
-            echo json_encode(['success' => false, 'message' => 'Staff ID is missing']);
+            echo json_encode(['status' => 'error', 'message' => 'Staff ID is missing']);
             return;
         }
 
         // Prevent self-deletion
         if ($id === $_SESSION['user_id']) {
-            echo json_encode(['success' => false, 'message' => 'You cannot delete your own account']);
+            echo json_encode(['status' => 'error', 'message' => 'You cannot delete your own account']);
             return;
         }
 
         if ($this->userModel->softDelete($id)) {
-            echo json_encode(['success' => true, 'message' => 'Staff member deleted successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Staff member deleted successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to delete staff member']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete staff member']);
         }
     }
 }

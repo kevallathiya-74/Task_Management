@@ -55,11 +55,11 @@ class TaskController
             $tasks = $this->taskModel->listAll($filters);
             
             echo json_encode([
-                'success' => true,
+                'status' => 'success',
                 'data' => $tasks
             ]);
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'Database Error: ' . $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Database Error: ' . $e->getMessage()]);
         }
     }
 
@@ -71,7 +71,7 @@ class TaskController
         $tasksData = $_POST['tasks'] ?? [];
 
         if (empty($tasksData) || !is_array($tasksData)) {
-            echo json_encode(['success' => false, 'message' => 'No task data provided']);
+            echo json_encode(['status' => 'error', 'message' => 'No task data provided']);
             return;
         }
 
@@ -96,15 +96,21 @@ class TaskController
                 ];
 
                 if (empty($data['project_id']) || empty($data['assigned_to']) || empty($data['title'])) {
-                    throw new \Exception("Task #" . ($index + 1) . ": Project, Assignee, and Title are required");
+                    echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Project, Assignee, and Title are required"]);
+                    $db->rollBack();
+                    return;
                 }
 
                 // Verify existence
                 if (!$this->projectModel->findById($data['project_id'])) {
-                    throw new \Exception("Task #" . ($index + 1) . ": Invalid project selected");
+                    echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Invalid project selected"]);
+                    $db->rollBack();
+                    return;
                 }
                 if (!$this->userModel->findById($data['assigned_to'])) {
-                    throw new \Exception("Task #" . ($index + 1) . ": Invalid assignee selected");
+                    echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Invalid assignee selected"]);
+                    $db->rollBack();
+                    return;
                 }
 
                 if (!$this->taskModel->create($data)) {
@@ -115,7 +121,7 @@ class TaskController
 
             $db->commit();
             echo json_encode([
-                'success' => true, 
+                'status' => 'success', 
                 'message' => $createdCount . ' task(s) created successfully'
             ]);
         } catch (\Exception $e) {
@@ -123,7 +129,7 @@ class TaskController
             if ($db->inTransaction()) {
                 $db->rollBack();
             }
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -134,19 +140,19 @@ class TaskController
         try {
             $id = $_POST['id'] ?? '';
             if (empty($id)) {
-                echo json_encode(['success' => false, 'message' => 'Task ID is missing']);
+                echo json_encode(['status' => 'error', 'message' => 'Task ID is missing']);
                 return;
             }
 
             $task = $this->taskModel->getById($id);
             if (!$task) {
-                echo json_encode(['success' => false, 'message' => 'Task not found']);
+                echo json_encode(['status' => 'error', 'message' => 'Task not found']);
                 return;
             }
 
             // Authorization check: Admin or Assignee
             if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
-                echo json_encode(['success' => false, 'message' => 'You are not authorized to update this task']);
+                echo json_encode(['status' => 'error', 'message' => 'You are not authorized to update this task']);
                 return;
             }
 
@@ -182,12 +188,12 @@ class TaskController
             }
 
             if ($this->taskModel->update($id, $data)) {
-                echo json_encode(['success' => true, 'message' => 'Task updated successfully']);
+                echo json_encode(['status' => 'success', 'message' => 'Task updated successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to update task']);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to update task']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -198,14 +204,14 @@ class TaskController
 
         $id = $_POST['id'] ?? '';
         if (empty($id)) {
-            echo json_encode(['success' => false, 'message' => 'Task ID is missing']);
+            echo json_encode(['status' => 'error', 'message' => 'Task ID is missing']);
             return;
         }
 
         if ($this->taskModel->softDelete($id)) {
-            echo json_encode(['success' => true, 'message' => 'Task deleted successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Task deleted successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to delete task']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete task']);
         }
     }
 
@@ -218,19 +224,19 @@ class TaskController
             $type = $_POST['type'] ?? ''; // 'complete' or 'incomplete'
 
             if (empty($id) || empty($type)) {
-                echo json_encode(['success' => false, 'message' => 'Missing data']);
+                echo json_encode(['status' => 'error', 'message' => 'Missing data']);
                 return;
             }
 
             $task = $this->taskModel->getById($id);
             if (!$task) {
-                echo json_encode(['success' => false, 'message' => 'Task not found']);
+                echo json_encode(['status' => 'error', 'message' => 'Task not found']);
                 return;
             }
 
             // Authorization check
             if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
-                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
                 return;
             }
 
@@ -259,12 +265,12 @@ class TaskController
             }
 
             if ($this->taskModel->update($id, $data)) {
-                echo json_encode(['success' => true, 'message' => 'Task status updated']);
+                echo json_encode(['status' => 'success', 'message' => 'Task status updated']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Update failed']);
+                echo json_encode(['status' => 'error', 'message' => 'Update failed']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
     public function enableRecurring()
@@ -274,9 +280,9 @@ class TaskController
 
         try {
             $id = $_POST['id'] ?? '';
-            $type = $_POST['type'] ?? ''; // 'weekly' or 'monthly'
+            $type = $_POST['type'] ?? ''; // 'daily', 'weekly' or 'monthly'
 
-            if (empty($id) || !in_array($type, ['weekly', 'monthly'])) {
+            if (empty($id) || !in_array($type, ['daily', 'weekly', 'monthly'])) {
                 echo json_encode(['success' => false, 'message' => 'Invalid data provided']);
                 return;
             }
@@ -297,14 +303,14 @@ class TaskController
                 $newId = $this->generateNextTask($parentTask);
                 
                 echo json_encode([
-                    'success' => true, 
+                    'status' => 'success', 
                     'message' => 'Recurring enabled. New task created for ' . $nextDate
                 ]);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to enable recurring']);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to enable recurring']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -321,12 +327,12 @@ class TaskController
             }
 
             if ($this->taskModel->updateRecurringStatus($id, 0, null, null, 'completed')) {
-                echo json_encode(['success' => true, 'message' => 'Recurring disabled successfully']);
+                echo json_encode(['status' => 'success', 'message' => 'Recurring disabled successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to disable recurring']);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to disable recurring']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -336,14 +342,14 @@ class TaskController
         try {
             $id = $_GET['id'] ?? '';
             if (empty($id)) {
-                echo json_encode(['success' => false, 'message' => 'Task ID is missing']);
+                echo json_encode(['status' => 'error', 'message' => 'Task ID is missing']);
                 return;
             }
 
             $logs = $this->taskModel->listRecurringLogs($id);
-            echo json_encode(['success' => true, 'data' => $logs]);
+            echo json_encode(['status' => 'success', 'data' => $logs]);
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -442,7 +448,9 @@ class TaskController
     private function calculateNextDate($currentDate, $type)
     {
         $date = new \DateTime($currentDate);
-        if ($type === 'weekly') {
+        if ($type === 'daily') {
+            $date->modify('+1 day');
+        } elseif ($type === 'weekly') {
             $date->modify('+7 days');
         } elseif ($type === 'monthly') {
             $date->modify('+1 month');

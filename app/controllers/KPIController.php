@@ -40,12 +40,12 @@ class KPIController
         $date = $_GET['date'] ?? '';
 
         if (!$userId || !$date) {
-            echo json_encode(['success' => false, 'message' => 'Missing parameters']);
+            echo json_encode(['status' => 'error', 'message' => 'Missing parameters']);
             return;
         }
 
         $record = $this->kpiModel->findDaily($userId, $date);
-        echo json_encode(['success' => true, 'data' => $record]);
+        echo json_encode(['status' => 'success', 'data' => $record]);
     }
 
     public function getStaffReportData()
@@ -55,7 +55,7 @@ class KPIController
         $duration = $_GET['duration'] ?? 'monthly';
 
         if (!$userId) {
-            echo json_encode(['success' => false, 'message' => 'User ID required']);
+            echo json_encode(['status' => 'error', 'message' => 'User ID required']);
             return;
         }
 
@@ -83,7 +83,7 @@ class KPIController
         }
 
         echo json_encode([
-            'success' => true, 
+            'status' => 'success', 
             'stats' => $stats,
             'history' => $history
         ]);
@@ -97,17 +97,17 @@ class KPIController
         $date = $_POST['kpi_date'] ?? '';
         
         if (!$userId || !$date) {
-            echo json_encode(['success' => false, 'message' => 'Staff and Date are required']);
+            echo json_encode(['status' => 'validation_error', 'message' => 'Staff and Date are required']);
             return;
         }
 
         if ($date > date('Y-m-d')) {
-            echo json_encode(['success' => false, 'message' => 'Future dates are not allowed.']);
+            echo json_encode(['status' => 'error', 'message' => 'Future dates are not allowed.']);
             return;
         }
 
         if (!$this->userModel->findById($userId)) {
-            echo json_encode(['success' => false, 'message' => 'Invalid staff member selected']);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid staff member selected']);
             return;
         }
 
@@ -126,9 +126,9 @@ class KPIController
         ];
 
         if ($this->kpiModel->saveDaily($data)) {
-            echo json_encode(['success' => true, 'message' => 'Daily KPI saved successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Daily KPI saved successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to save KPI']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to save KPI']);
         }
     }
 
@@ -158,11 +158,11 @@ class KPIController
         $duration = $_POST['duration'] ?? '';
 
         if (!$userId || !$duration) {
-            echo json_encode(['success' => false]);
+            echo json_encode(['status' => 'error', 'message' => 'Missing data']);
             return;
         }
 
         $this->kpiModel->logReport($userId, $duration);
-        echo json_encode(['success' => true]);
+        echo json_encode(['status' => 'success']);
     }
 }

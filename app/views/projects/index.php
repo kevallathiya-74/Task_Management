@@ -298,7 +298,7 @@ $(document).ready(function() {
                     const isAdmin = '<?= $_SESSION['user_role'] ?>' === 'admin';
                     return `
                         <div class="dropdown">
-                            <button class="action-btn-sm" data-bs-toggle="dropdown">
+                            <button class="action-btn-sm" data-bs-toggle="dropdown" data-bs-display="static">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-deep border-0 rounded-4 p-2">
@@ -336,7 +336,8 @@ $(document).ready(function() {
     handleFormSubmit('#editProjectForm', () => { $('#editProjectModal').modal('hide'); table.ajax.reload(); });
 
     $(document).on('click', '.edit-project', function() {
-        const data = table.row($(this).closest('tr')).data();
+        const $tr = $(this).closest('.dropdown-menu').data('original-tr') || $(this).closest('tr');
+        const data = table.row($tr).data();
         $('#edit_id').val(data.id);
         $('#edit_project_name').val(data.project_name);
         $('#edit_client_name').val(data.client_name);
@@ -360,12 +361,14 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post('<?= url('/api/projects/delete') ?>', { id: id }, (res) => {
-                    if (res.success) { 
+                    if (res.status === 'success' || res.success) { 
                         toastr.success(res.message); 
                         table.ajax.reload(null, false); 
                     } else { 
                         toastr.error(res.message); 
                     }
+                }).fail((xhr) => {
+                    toastr.error(xhr.responseJSON?.message || 'Failed to terminate project');
                 });
             }
         });

@@ -43,11 +43,11 @@ class ProjectController
             $projects = $this->projectModel->listAll($filters);
             
             echo json_encode([
-                'success' => true,
+                'status' => 'success',
                 'data' => $projects
             ]);
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => 'Database Error: ' . $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => 'Database Error: ' . $e->getMessage()]);
         }
     }
 
@@ -69,34 +69,34 @@ class ProjectController
 
             // Robust Validation
             if (empty($data['project_name']) || empty($data['role_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Project name and department are required']);
+                echo json_encode(['status' => 'validation_error', 'message' => 'Project name and department are required']);
                 return;
             }
 
             if (strtotime($data['deadline']) < strtotime($data['start_date'])) {
-                echo json_encode(['success' => false, 'message' => 'Deadline cannot be before the start date']);
+                echo json_encode(['status' => 'validation_error', 'message' => 'Deadline cannot be before the start date']);
                 return;
             }
 
             if (!$this->roleModel->findById($data['role_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
+                echo json_encode(['status' => 'validation_error', 'message' => 'Invalid department selected']);
                 return;
             }
 
             // Check duplicate name
             if ($this->projectModel->findByName($data['project_name'])) {
-                echo json_encode(['success' => false, 'message' => 'A project with this name already exists']);
+                echo json_encode(['status' => 'validation_error', 'message' => 'A project with this name already exists']);
                 return;
             }
 
             $id = $this->projectModel->create($data);
             if ($id) {
-                echo json_encode(['success' => true, 'message' => 'Project created successfully']);
+                echo json_encode(['status' => 'success', 'message' => 'Project created successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to create project']);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to create project']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -108,7 +108,7 @@ class ProjectController
         try {
             $id = $_POST['id'] ?? '';
             if (empty($id)) {
-                echo json_encode(['success' => false, 'message' => 'Project ID is missing']);
+                echo json_encode(['status' => 'error', 'message' => 'Project ID is missing']);
                 return;
             }
 
@@ -123,27 +123,27 @@ class ProjectController
             ];
 
             if (empty($data['project_name']) || empty($data['role_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Project name and department are required']);
+                echo json_encode(['status' => 'error', 'message' => 'Project name and department are required']);
                 return;
             }
 
             if (strtotime($data['deadline']) < strtotime($data['start_date'])) {
-                echo json_encode(['success' => false, 'message' => 'Deadline cannot be before the start date']);
+                echo json_encode(['status' => 'error', 'message' => 'Deadline cannot be before the start date']);
                 return;
             }
 
             if (!$this->roleModel->findById($data['role_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Invalid department selected']);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid department selected']);
                 return;
             }
 
             if ($this->projectModel->update($id, $data)) {
-                echo json_encode(['success' => true, 'message' => 'Project updated successfully']);
+                echo json_encode(['status' => 'success', 'message' => 'Project updated successfully']);
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to update project']);
+                echo json_encode(['status' => 'error', 'message' => 'Failed to update project']);
             }
         } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 
@@ -154,14 +154,14 @@ class ProjectController
 
         $id = $_POST['id'] ?? '';
         if (empty($id)) {
-            echo json_encode(['success' => false, 'message' => 'Project ID is missing']);
+            echo json_encode(['status' => 'error', 'message' => 'Project ID is missing']);
             return;
         }
 
         if ($this->projectModel->softDelete($id)) {
-            echo json_encode(['success' => true, 'message' => 'Project deleted successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Project deleted successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to delete project']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to delete project']);
         }
     }
 }

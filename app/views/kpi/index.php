@@ -266,7 +266,7 @@ function loadDailyKpi() {
     $('#kpi-form-placeholder').addClass('d-none');
 
     $.get('<?= url('/api/admin/kpi/daily-record') ?>', { user_id: userId, date: date }, function(res) {
-        if (res.success && res.data) {
+        if ((res.status === 'success' || res.success) && res.data) {
             const d = res.data;
             $('#kpi-status-badge').text('AMENDING RECORD').removeClass('bg-primary-soft text-primary').addClass('bg-warning-soft text-warning');
             
@@ -325,12 +325,15 @@ function saveDailyKpi() {
 
     $.post('<?= url('/api/admin/kpi/save-daily') ?>', data, function(res) {
         btn.prop('disabled', false).html('<i class="fas fa-cloud-arrow-up me-2"></i>Commit Daily Metrics');
-        if (res.success) {
+        if (res.status === 'success' || res.success) {
             toastr.success(res.message);
             loadRankings();
         } else {
             toastr.error(res.message);
         }
+    }).fail(function(xhr) {
+        btn.prop('disabled', false).html('<i class="fas fa-cloud-arrow-up me-2"></i>Commit Daily Metrics');
+        toastr.error(xhr.responseJSON?.message || 'Failed to save KPI');
     });
 }
 
@@ -349,7 +352,7 @@ function loadRankings() {
     $('#performance-ranking-body tr').each(function() {
         const staffId = $(this).data('staff-id');
         $.get('<?= url('/api/admin/kpi/monthly-report') ?>', { user_id: staffId, month: month, year: year }, function(res) {
-            if (res.success && res.stats.days_recorded > 0) {
+            if ((res.status === 'success' || res.success) && res.stats.days_recorded > 0) {
                 const avg = parseFloat(res.stats.avg_total).toFixed(1);
                 $(`#avg-kpi-${staffId}`).text(avg + '%');
                 

@@ -90,6 +90,105 @@ $(document).ready(function() {
             dom: '<"d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mb-4"f l>rt<"d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mt-4"i p>',
         });
     }
+    // Modal Reset - Fix for "Processing..." stuck state
+    $('.modal').on('show.bs.modal', function() {
+        const $submitBtn = $(this).find('button[type="submit"]');
+        if ($submitBtn.length && $submitBtn.data('original-html')) {
+            $submitBtn.prop('disabled', false).html($submitBtn.data('original-html'));
+        }
+    });
+
+    $('.modal').on('hidden.bs.modal', function() {
+        const $form = $(this).find('form');
+        if ($form.length && !$form.hasClass('no-reset')) {
+            $form[0].reset();
+            // Also reset hidden progress inputs if any
+            $form.find('input[type="hidden"]').val(function(i, val) {
+                return $(this).hasClass('keep-val') ? val : '';
+            });
+        }
+    });
+
+    // --- Action Dropdown Overflow Fix for DataTables (Portal Pattern) ---
+    let $activePortalMenu = null;
+    let $activePortalParent = null;
+
+    $('body').on('show.bs.dropdown', '.table-responsive', function (e) {
+        let $dropdownBtn = $(e.target);
+        let $menu = $dropdownBtn.next('.dropdown-menu');
+        
+        if (!$menu.length) {
+            $menu = $dropdownBtn.parent().find('.dropdown-menu');
+        }
+
+        if ($menu.length) {
+            $activePortalParent = $menu.parent();
+            $activePortalMenu = $menu;
+            
+            // Save original row reference for action handlers
+            $menu.data('original-tr', $dropdownBtn.closest('tr'));
+            
+            // Move to body to escape overflow clipping
+            $menu.addClass('dropdown-portal').appendTo('body');
+            
+            // Force display to calculate dimensions
+            $menu.css({ display: 'block', visibility: 'hidden' });
+            
+            let btnOffset = $dropdownBtn.offset();
+            let btnHeight = $dropdownBtn.outerHeight();
+            let btnWidth = $dropdownBtn.outerWidth();
+            let menuHeight = $menu.outerHeight();
+            let menuWidth = $menu.outerWidth();
+            let windowHeight = $(window).height();
+            let scrollTop = $(window).scrollTop();
+            
+            // Default placement: below, right-aligned
+            let topPos = btnOffset.top + btnHeight + 4;
+            let leftPos = btnOffset.left - menuWidth + btnWidth;
+            
+            // Smart positioning: flip upwards if out of bounds (not enough bottom space)
+            if ((btnOffset.top - scrollTop + btnHeight + menuHeight + 10) > windowHeight) {
+                topPos = btnOffset.top - menuHeight - 4;
+            }
+            
+            // Prevent going off left screen edge
+            if (leftPos < 0) {
+                leftPos = btnOffset.left;
+            }
+            
+            $menu.css({
+                position: 'absolute',
+                top: topPos + 'px',
+                left: leftPos + 'px',
+                right: 'auto',
+                bottom: 'auto',
+                transform: 'none', // Override Popper.js completely
+                zIndex: 1060, // Keep above all UI elements
+                visibility: 'visible'
+            });
+        }
+    });
+
+    $('body').on('hide.bs.dropdown', '.table-responsive', function (e) {
+        if ($activePortalMenu && $activePortalParent) {
+            $activePortalMenu.css({
+                position: '',
+                top: '',
+                left: '',
+                right: '',
+                bottom: '',
+                transform: '',
+                zIndex: '',
+                display: '',
+                visibility: ''
+            }).removeClass('dropdown-portal');
+            
+            $activePortalParent.append($activePortalMenu);
+            
+            $activePortalMenu = null;
+            $activePortalParent = null;
+        }
+    });
 });
 
 /**
@@ -101,14 +200,39 @@ function handleFormSubmit(selector, callback) {
     const $form = $(selector);
     if (!$form.length) return;
 
-    $form.on('submit', function(e) {
+    // Use off().on() to prevent duplicate event listeners
+    $form.off('submit').on('submit', function(e) {
         e.preventDefault();
         
         const $submitBtn = $form.find('button[type="submit"]');
+        
+        // Prevent double submission if already processing
+        if ($submitBtn.prop('disabled')) return;
+
+        // Basic Frontend Validation
+        let isValid = true;
+        let firstInvalid = null;
+        $form.find('[required]').each(function() {
+            if (!$(this).val() || ($(this).is('select') && $(this).val() === null)) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+                if (!firstInvalid) firstInvalid = $(this);
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            toastr.warning('Please fill in all required fields');
+            if (firstInvalid) firstInvalid.focus();
+            return;
+        }
+
         const originalBtnHtml = $submitBtn.html();
         const noToast = $form.data('no-toast') === true;
         
         // Disable button and show loading state
+        $submitBtn.data('original-html', originalBtnHtml);
         $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
 
         $.ajax({
@@ -118,26 +242,40 @@ function handleFormSubmit(selector, callback) {
             processData: false,
             contentType: false,
             dataType: 'json',
+            timeout: 15000, // 15 seconds timeout as per requirements
             success: function(response) {
-                if (response.success) {
+                // Support both legacy .success and new .status formats
+                const isSuccess = response.status === 'success' || response.success === true;
+                const isValidationErr = response.status === 'validation_error';
+
+                if (isSuccess) {
                     if (!noToast) {
                         toastr.success(response.message || 'Action completed successfully');
                     }
                     if (callback && typeof callback === 'function') {
                         callback(response);
                     }
+                } else if (isValidationErr) {
+                    toastr.warning(response.message || 'Please correct the validation errors');
+                    // Add logic here to highlight specific fields if response.errors is provided
                 } else {
                     toastr.error(response.message || 'Something went wrong');
-                    $submitBtn.prop('disabled', false).html(originalBtnHtml);
                 }
             },
-            error: function(xhr) {
+            error: function(xhr, status, error) {
                 let message = 'An error occurred. Please try again.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
+                if (status === 'timeout') {
+                    message = 'Request timed out. Please try again.';
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     message = xhr.responseJSON.message;
                 }
                 toastr.error(message);
-                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+            },
+            complete: function() {
+                // ALWAYS re-enable button regardless of outcome
+                setTimeout(() => {
+                    $submitBtn.prop('disabled', false).html($submitBtn.data('original-html') || originalBtnHtml);
+                }, 200);
             }
         });
     });

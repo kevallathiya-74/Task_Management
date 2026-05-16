@@ -251,7 +251,7 @@ $(document).ready(function() {
                 render: function(data) {
                     return `
                         <div class="dropdown">
-                            <button class="action-btn-sm" data-bs-toggle="dropdown">
+                            <button class="action-btn-sm" data-bs-toggle="dropdown" data-bs-display="static">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-deep border-0 rounded-4 p-2">
@@ -296,7 +296,8 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.edit-staff', function() {
-        const staff = table.row($(this).closest('tr')).data();
+        const $tr = $(this).closest('.dropdown-menu').data('original-tr') || $(this).closest('tr');
+        const staff = table.row($tr).data();
         $('#edit_id').val(staff.id);
         $('#edit_full_name').val(staff.full_name);
         $('#edit_username').val(staff.username);
@@ -319,12 +320,14 @@ $(document).ready(function() {
         }).then((result) => {
             if (result.isConfirmed) {
                 $.post('<?= url('/api/staff/delete') ?>', { id: id }, function(res) {
-                    if (res.success) {
+                    if (res.status === 'success' || res.success) {
                         toastr.success(res.message);
                         table.ajax.reload(null, false);
                     } else {
                         toastr.error(res.message);
                     }
+                }).fail(function(xhr) {
+                    toastr.error(xhr.responseJSON?.message || 'Failed to remove access');
                 });
             }
         });

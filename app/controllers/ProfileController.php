@@ -70,12 +70,12 @@ class ProfileController
         $confirmPassword = $_POST['confirm_password'] ?? '';
 
         if (empty($newPassword)) {
-            echo json_encode(['success' => false, 'message' => 'New password cannot be empty']);
+            echo json_encode(['status' => 'error', 'message' => 'New password cannot be empty']);
             return;
         }
 
         if ($newPassword !== $confirmPassword) {
-            echo json_encode(['success' => false, 'message' => 'Passwords do not match']);
+            echo json_encode(['status' => 'error', 'message' => 'Passwords do not match']);
             return;
         }
 
@@ -93,9 +93,9 @@ class ProfileController
         ];
 
         if ($this->userModel->update($userId, $updateData)) {
-            echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
+            echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to update profile']);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update profile']);
         }
     }
 }

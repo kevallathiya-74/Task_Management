@@ -124,13 +124,15 @@ $(document).ready(function() {
         }
 
         $.post('<?= url('/api/profile/update') ?>', $(this).serialize(), function(res) {
-            if (res.success) {
+            if (res.status === 'success' || res.success) {
                 toastr.success(res.message);
                 $('#securityForm')[0].reset();
             } else {
                 toastr.error(res.message);
             }
-        }, 'json');
+        }, 'json').fail(function(xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Failed to update profile');
+        });
     });
 });
 </script>

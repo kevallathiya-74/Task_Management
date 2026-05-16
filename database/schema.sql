@@ -1,8 +1,8 @@
 -- Taskly: Task Management & Performance SaaS Database Schema
 -- Last Updated: 2026-05-14
 
--- CREATE DATABASE IF NOT EXISTS task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- USE task_management;
+CREATE DATABASE IF NOT EXISTS task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE task_management;
 
 -- 1. Roles Table (Departments/Modules)
 CREATE TABLE IF NOT EXISTS roles (
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     completed_at TIMESTAMP NULL,
     admin_alert_sent TINYINT(1) DEFAULT 0,
     is_recurring TINYINT(1) DEFAULT 0,
-    recurring_type ENUM('weekly', 'monthly') NULL,
+    recurring_type ENUM('daily', 'weekly', 'monthly') NULL,
     recurring_parent_id CHAR(36) NULL,
     next_repeat_date DATE NULL,
     repeat_status ENUM('active', 'paused', 'completed') DEFAULT 'active',
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS task_alerts (
 CREATE TABLE IF NOT EXISTS task_recurring_logs (
     id CHAR(36) PRIMARY KEY,
     task_id CHAR(36) NOT NULL,
-    recurring_type ENUM('weekly', 'monthly') NOT NULL,
+    recurring_type ENUM('daily', 'weekly', 'monthly') NOT NULL,
     generated_task_id CHAR(36) NOT NULL,
     generated_date DATE NOT NULL,
     created_by CHAR(36) NOT NULL,
@@ -216,7 +216,8 @@ INSERT IGNORE INTO roles (id, name, slug) VALUES
 ('c7b8a9d0-e1f2-4a3b-8c4d-5e6f7a8b9c0d', 'Video Editing', 'video_editing'),
 ('9d0e1f2a-3b4c-4d5e-8f6a-7b8c9d0e1f2a', 'Social Media Management', 'smm'),
 ('3b4c5d6e-7f8a-4b9c-bd0e-1f2a3b4c5d6e', 'AI Video Making', 'ai_video'),
-('20e3f4a5-6b7c-8d9e-a0b1-c2d3e4f5a6b7', 'Client Management', 'client_management');
+('20e3f4a5-6b7c-8d9e-a0b1-c2d3e4f5a6b7', 'Client Management', 'client_management'),
+('ce41eb64-5059-11f1-8ccd-309c2374f21d', 'Marketing Manager', 'marketing_manager');
 
 -- Seed Super Admin User (Default Password: 1234)
 -- Note: Replace password_hash with a secure bcrypt hash in production.

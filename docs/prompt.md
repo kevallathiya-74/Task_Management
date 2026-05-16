@@ -1,202 +1,259 @@
-DROPDOWN / SELECT BOX UI FIX REQUIRED
+REMOVE PUBLISHING REPORT MODULE COMPLETELY
+FULL SYSTEM CLEANUP REQUIRED
 
 IMPORTANT:
-Current dropdown/select boxes are visually broken.
+Completely DELETE the entire Publishing Report module from the project.
 
-Visible issues:
+REMOVE EVERYTHING related to:
 
-* selected value text cut off
-* text alignment broken
-* dropdown height inconsistent
-* placeholder/value overlap
-* padding not correct
-* arrow/icon alignment broken
-* select field looks cramped
+* frontend
+* backend
+* database
+* AJAX
+* routes
+* sidebar
+* permissions
+* assignments
+* APIs
+* CSS
+* JS
+* SQL
+* validations
+* modals
+* rendering
+* save logic
 
-DO NOT:
-
-* redesign full modal
-* change backend logic
-* modify database
-* change business workflow
-
-ONLY:
-
-* fix dropdown/select UI properly
-* improve alignment
-* improve spacing
-* improve SaaS-level form quality
+THIS MUST BE A COMPLETE CLEAN REMOVAL.
 
 ==================================================
-CURRENT PROBLEM
-===============
-
-Dropdown/select fields currently:
-
-* cut text vertically
-* hide selected values
-* have broken padding
-* inconsistent heights
-* bad typography alignment
-
-Affected fields:
-
-* Project
-* Assigned To
-* Department
-* Priority
-* Status
-
-==================================================
-REQUIRED RESULT
-===============
-
-All dropdown/select fields should:
-
-* display selected value correctly
-* show full text
-* align vertically center
-* have equal height
-* maintain proper spacing
-* feel premium SaaS quality
-
-==================================================
-SELECT FIELD FIX
-================
-
-Fix:
-
-* line-height
-* padding-top
-* padding-bottom
-* height
-* overflow hidden
-* text clipping
-* icon positioning
-
-==================================================
-REQUIRED FIELD DESIGN
-=====================
-
-Dropdowns should look:
-
-* clean
-* spacious
-* modern
-* balanced
-* easy to read
-
-==================================================
-TEXT ALIGNMENT FIX
-==================
-
-Selected text must:
-
-* align vertically center
-* not touch top border
-* not clip bottom
-* preserve readable spacing
-
-==================================================
-ICON / ARROW FIX
-================
-
-Dropdown arrow icon must:
-
-* align center vertically
-* not overlap text
-* stay consistent across all fields
-
-==================================================
-CONSISTENT HEIGHT RULE
-======================
-
-ALL inputs/selects must have SAME height.
-
-Fix:
-
-* select field height
-* date field height
-* time field height
-* text input height
-
-==================================================
-RESPONSIVE FIX
-==============
-
-Desktop:
-
-* proper spacing
-
-Tablet:
-
-* no clipping
-
-Mobile:
-
-* full visible text
-* no overflow
-
-==================================================
-TECHNICAL FIX REQUIREMENTS
-==========================
-
-Analyze and fix:
-
-* select padding
-* flex alignment
-* line-height mismatch
-* Bootstrap default select styles
-* overflow hidden issues
-* custom select wrapper sizing
-
-==================================================
-IMPORTANT CSS FIX
-=================
-
-Ensure:
-
-* proper min-height
-* proper padding
-* appearance reset if needed
-* custom select alignment
-
-==================================================
-VALIDATION STATE FIX
+REMOVE FROM FRONTEND
 ====================
 
-Error states should:
+DELETE:
 
-* not shift layout
-* preserve alignment
-* preserve field height
+* Publishing Report button
+* Publishing Report page
+* Publishing Report modal
+* Publishing Report tables
+* row editor
+* color picker
+* assignment dropdown
+* Add Row buttons
+* SAVE button
+* Publishing Report filters
+* Publishing Report sections
+
+==================================================
+REMOVE FROM SIDEBAR
+===================
+
+DELETE:
+
+* Publishing Report navigation item
+* Publishing Report routes
+* menu references
+
+==================================================
+REMOVE FROM JAVASCRIPT
+======================
+
+DELETE ALL:
+
+* publishing-report.js
+* publishing handlers
+* dynamic row logic
+* assignment logic
+* color selection logic
+* autosave logic
+* report rendering logic
+* AJAX calls
+* event listeners
+
+==================================================
+REMOVE FROM BACKEND
+===================
+
+DELETE:
+
+* save-report.php
+* fetch-report.php
+* assignment APIs
+* report APIs
+* row APIs
+* cell APIs
+* Publishing Report controllers
+* helper functions
+* report services
+
+==================================================
+REMOVE FROM DATABASE
+====================
+
+DELETE ALL TABLES RELATED TO:
+
+* publishing_reports
+* report_rows
+* report_cells
+* report_assignments
+* publishing_templates
+* recurring_reports
+
+==================================================
+REMOVE FOREIGN KEYS
+===================
+
+DELETE:
+
+* foreign keys
+* indexes
+* constraints
+* triggers
+* relations
+
+==================================================
+SQL CLEANUP REQUIRED
+====================
+
+Create safe cleanup SQL.
+
+DROP:
+
+* tables
+* indexes
+* constraints
+* orphan references
+
+VERIFY:
+no broken references remain.
+
+==================================================
+REMOVE FROM TASK FLOW
+=====================
+
+DELETE:
+
+* Publishing Report task creation
+* report-based task logic
+* recurring report logic
+* report assignment flow
+
+==================================================
+REMOVE FROM USER DASHBOARD
+==========================
+
+DELETE:
+
+* report rendering
+* assigned report sections
+* report visibility logic
+* report filtering
+
+==================================================
+REMOVE FROM ADMIN PANEL
+=======================
+
+DELETE:
+
+* report management
+* report assignment UI
+* report permissions
+* report actions
+
+==================================================
+REMOVE CSS
+==========
+
+DELETE:
+
+* report table styles
+* report colors
+* report layouts
+* report responsive rules
+
+==================================================
+REMOVE AJAX ENDPOINTS
+=====================
+
+DELETE:
+
+* saveReport
+* fetchReport
+* assignReport
+* updateCell
+* updateColor
+* createRow
+
+==================================================
+REMOVE VALIDATION LOGIC
+=======================
+
+DELETE:
+
+* duplicate row validation
+* assignment validation
+* report validation
+* report title validation
+
+==================================================
+REMOVE ROUTES
+=============
+
+DELETE:
+
+* /publishing-report
+* /save-report
+* /fetch-report
+* /assign-report
+
+==================================================
+REMOVE SESSION DATA
+===================
+
+DELETE:
+
+* report session state
+* report cache
+* report temp state
+
+==================================================
+VERIFY CLEANUP
+==============
+
+After removal:
+VERIFY:
+
+1. no sidebar links remain
+2. no console errors
+3. no broken imports
+4. no PHP include errors
+5. no orphan SQL tables
+6. no AJAX failures
+7. no broken dashboard rendering
+8. no dead routes
 
 ==================================================
 IMPORTANT
 =========
 
-If file exists:
+DO NOT:
 
-* UPDATE existing styles carefully
+* break Task Management
+* break KPI system
+* break Leave Management
+* break authentication
+* break dashboard
 
-Do NOT:
-
-* create new form system
-* duplicate fields
-* break responsiveness
+ONLY remove Publishing Report module.
 
 ==================================================
 FINAL GOAL
 ==========
 
-Dropdown/select fields should feel:
+System should become:
 
-* premium
-* polished
-* readable
-* spacious
-* enterprise SaaS quality
+* cleaner
+* lighter
+* stable
+* maintainable
 
-No clipping.
-No overlap.
-No broken alignment.
+WITHOUT ANY Publishing Report code remaining anywhere in project.

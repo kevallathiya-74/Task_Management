@@ -203,63 +203,65 @@ $(document).ready(function() {
 
 function loadChartData() {
     $.get('<?= url('/api/dashboard/charts') ?>', function(res) {
-        res.tasks.forEach(t => {
-            $(`#${t.priority}-count`).text(t.count);
-        });
+        if (res.status === 'success' || res.success) {
+            res.tasks.forEach(t => {
+                $(`#${t.priority}-count`).text(t.count);
+            });
 
-        const ctx = document.getElementById('growthChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(139, 92, 246, 0.15)');
-        gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.15)');
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: res.growth.map(g => moment(g.date).format('ddd, DD')),
-                datasets: [{
-                    label: 'Tasks Created',
-                    data: res.growth.map(g => g.count),
-                    borderColor: '#8b5cf6',
-                    backgroundColor: gradient,
-                    borderWidth: 4,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#8b5cf6',
-                    pointBorderWidth: 3,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    pointHoverBackgroundColor: '#8b5cf6',
-                    pointHoverBorderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#0f172a',
-                        padding: 12,
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 },
-                        cornerRadius: 12,
-                        displayColors: false
-                    }
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: res.growth.map(g => moment(g.date).format('ddd, DD')),
+                    datasets: [{
+                        label: 'Tasks Created',
+                        data: res.growth.map(g => g.count),
+                        borderColor: '#8b5cf6',
+                        backgroundColor: gradient,
+                        borderWidth: 4,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#8b5cf6',
+                        pointBorderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#8b5cf6',
+                        pointHoverBorderColor: '#fff'
+                    }]
                 },
-                scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
-                        ticks: { color: '#94a3b8', font: { weight: '600' } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            cornerRadius: 12,
+                            displayColors: false
+                        }
                     },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#94a3b8', font: { weight: '600' } }
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
+                            ticks: { color: '#94a3b8', font: { weight: '600' } }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { weight: '600' } }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     });
 }
 
@@ -269,7 +271,7 @@ function showPriorityTasks(priority) {
     $('#priority-tasks-list').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
 
     $.get('<?= url('/api/dashboard/priority-tasks') ?>', { priority: priority }, function(res) {
-        if (res.success && res.data.length > 0) {
+        if ((res.status === 'success' || res.success) && res.data.length > 0) {
             let html = '';
             res.data.forEach(task => {
                 const borderClass = priority === 'high' ? 'border-danger' : (priority === 'medium' ? 'border-warning' : 'border-primary');
@@ -307,6 +309,8 @@ function showPriorityTasks(priority) {
         } else {
             $('#priority-tasks-list').html('<div class="text-center py-5 text-neutral-400 fw-medium">No tasks found for this priority.</div>');
         }
+    }).fail(() => {
+        $('#priority-tasks-list').html('<div class="text-center py-5 text-danger fw-medium">Failed to load tasks.</div>');
     });
 }
 
@@ -316,19 +320,21 @@ function updateTaskStatus(id, type, checked) {
     row.find('input[type="checkbox"]').not(event.target).prop('checked', false);
 
     $.post('<?= url('/api/tasks/update-status') ?>', { id: id, type: type }, function(res) {
-        if (res.success) {
+        if (res.status === 'success' || res.success) {
             toastr.success(res.message);
             loadChartData();
         } else {
             toastr.error(res.message);
         }
+    }).fail((xhr) => {
+        toastr.error(xhr.responseJSON?.message || 'Update failed');
     });
 }
 
 function pollAlerts() {
     <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
     $.get('<?= url('/api/dashboard/alerts') ?>', function(res) {
-        if (res.success && res.data.length > 0) {
+        if ((res.status === 'success' || res.success) && res.data && res.data.length > 0) {
             res.data.forEach(alert => {
                 if ($(`#alert-${alert.id}`).length === 0) {
                     showAdminPopup(alert);
@@ -361,7 +367,7 @@ function showAdminPopup(alert) {
 
 function dismissAlert(id) {
     $.post('<?= url('/api/dashboard/alerts/read') ?>', { id: id }, function(res) {
-        if (res.success) {
+        if (res.status === 'success' || res.success) {
             $(`#alert-${id}`).addClass('animate-fade-out');
             setTimeout(() => $(`#alert-${id}`).remove(), 300);
         }
@@ -424,3 +430,4 @@ function reassignTask(taskId, alertId) {
 
 .leading-relaxed { line-height: 1.6; }
 </style>
+
