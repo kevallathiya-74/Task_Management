@@ -114,27 +114,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr data-weight="30" data-kpi="productivity">
+                                    <tr class="kpi-score-item" data-weight="30" data-kpi="productivity">
                                         <td>Productivity</td>
                                         <td><input type="number" min="0" max="10" class="form-control form-control-sm text-center kpi-input rounded-pill border-0 bg-neutral-100" value="0"></td>
                                         <td class="text-end fw-bold text-primary result-cell">0.0%</td>
                                     </tr>
-                                    <tr data-weight="25" data-kpi="quality">
+                                    <tr class="kpi-score-item" data-weight="25" data-kpi="quality">
                                         <td>Quality</td>
                                         <td><input type="number" min="0" max="10" class="form-control form-control-sm text-center kpi-input rounded-pill border-0 bg-neutral-100" value="0"></td>
                                         <td class="text-end fw-bold text-primary result-cell">0.0%</td>
                                     </tr>
-                                    <tr data-weight="15" data-kpi="discipline">
+                                    <tr class="kpi-score-item" data-weight="15" data-kpi="discipline">
                                         <td>Discipline</td>
                                         <td><input type="number" min="0" max="10" class="form-control form-control-sm text-center kpi-input rounded-pill border-0 bg-neutral-100" value="0"></td>
                                         <td class="text-end fw-bold text-primary result-cell">0.0%</td>
                                     </tr>
-                                    <tr data-weight="15" data-kpi="communication">
+                                    <tr class="kpi-score-item" data-weight="15" data-kpi="communication">
                                         <td>Communication</td>
                                         <td><input type="number" min="0" max="10" class="form-control form-control-sm text-center kpi-input rounded-pill border-0 bg-neutral-100" value="0"></td>
                                         <td class="text-end fw-bold text-primary result-cell">0.0%</td>
                                     </tr>
-                                    <tr data-weight="15" data-kpi="growth">
+                                    <tr class="kpi-score-item" data-weight="15" data-kpi="growth">
                                         <td>Growth</td>
                                         <td><input type="number" min="0" max="10" class="form-control form-control-sm text-center kpi-input rounded-pill border-0 bg-neutral-100" value="0"></td>
                                         <td class="text-end fw-bold text-primary result-cell">0.0%</td>
@@ -241,7 +241,7 @@ $(document).ready(function() {
         loadRankings();
     });
 
-    $('.kpi-range-input').on('input', function() {
+    $('.kpi-input').on('input', function() {
         const val = $(this).val();
         $(this).closest('.kpi-score-item').find('.score-display').text(parseFloat(val).toFixed(1)).toggleClass('text-primary', val > 0);
         calculateDailyKpi();
@@ -279,7 +279,7 @@ function loadDailyKpi() {
             $('#kpi-notes').val(d.admin_notes);
         } else {
             $('#kpi-status-badge').text('NEW ENTRY READY').removeClass('bg-warning-soft text-warning').addClass('bg-primary-soft text-primary');
-            $('.kpi-range-input').val(0);
+            $('.kpi-input').val(0);
             $('.score-display').text('0.0').removeClass('text-primary');
             $('#kpi-notes').val('');
         }
@@ -289,7 +289,7 @@ function loadDailyKpi() {
 
 function setRangeValue(kpi, val) {
     const item = $(`.kpi-score-item[data-kpi="${kpi}"]`);
-    item.find('.kpi-range-input').val(val);
+    item.find('.kpi-input').val(val);
     item.find('.score-display').text(val.toFixed(1)).addClass('text-primary');
 }
 
@@ -297,7 +297,7 @@ function calculateDailyKpi() {
     let totalScore = 0;
     $('.kpi-score-item').each(function() {
         const weight = parseFloat($(this).data('weight'));
-        const score = parseFloat($(this).find('.kpi-range-input').val()) || 0;
+        const score = parseFloat($(this).find('.kpi-input').val()) || 0;
         const weightedResult = (score / 10) * weight;
         $(this).find('.result-cell').text(weightedResult.toFixed(1) + '%');
         totalScore += weightedResult;
@@ -309,11 +309,11 @@ function saveDailyKpi() {
     const data = {
         user_id: $('#kpi-staff-select').val(),
         kpi_date: $('#kpi-date-select').val(),
-        productivity_score: parseFloat($('.kpi-score-item[data-kpi="productivity"] .result-cell').text()),
-        quality_score: parseFloat($('.kpi-score-item[data-kpi="quality"] .result-cell').text()),
-        discipline_score: parseFloat($('.kpi-score-item[data-kpi="discipline"] .result-cell').text()),
-        communication_score: parseFloat($('.kpi-score-item[data-kpi="communication"] .result-cell').text()),
-        growth_score: parseFloat($('.kpi-score-item[data-kpi="growth"] .result-cell').text()),
+        productivity_score: parseFloat($('.kpi-score-item[data-kpi="productivity"] .kpi-input').val()) || 0,
+        quality_score: parseFloat($('.kpi-score-item[data-kpi="quality"] .kpi-input').val()) || 0,
+        discipline_score: parseFloat($('.kpi-score-item[data-kpi="discipline"] .kpi-input').val()) || 0,
+        communication_score: parseFloat($('.kpi-score-item[data-kpi="communication"] .kpi-input').val()) || 0,
+        growth_score: parseFloat($('.kpi-score-item[data-kpi="growth"] .kpi-input').val()) || 0,
         weighted_total_score: parseFloat($('#display-daily-total').text()),
         salary_approval_percentage: (parseFloat($('#display-daily-total').text()) * 0.75).toFixed(2),
         performance_status: getPerformanceStatus(parseFloat($('#display-daily-total').text())),

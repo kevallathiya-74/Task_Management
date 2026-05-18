@@ -4,18 +4,21 @@ namespace App\Controllers;
 
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\User;
 use App\Middleware\AuthMiddleware;
 
 class ProjectController
 {
     protected $projectModel;
     protected $roleModel;
+    protected $userModel;
 
     public function __construct()
     {
         AuthMiddleware::handle();
         $this->projectModel = new Project();
         $this->roleModel = new Role();
+        $this->userModel = new User();
     }
 
     public function index()
@@ -23,6 +26,7 @@ class ProjectController
         $title = 'Project Management';
         $active_page = 'projects';
         $roles = $this->roleModel->all();
+        $staff = $this->userModel->listAll();
 
         require_once ROOT_PATH . '/app/views/layouts/header.php';
         require_once ROOT_PATH . '/app/views/layouts/sidebar.php';
@@ -61,14 +65,15 @@ class ProjectController
                 'project_name' => trim($_POST['project_name'] ?? ''),
                 'client_name' => trim($_POST['client_name'] ?? ''),
                 'description' => trim($_POST['description'] ?? ''),
-                'role_id' => $_POST['role_id'] ?? '',
+                'role_ids' => $_POST['role_ids'] ?? [],
                 'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d'),
                 'deadline' => !empty($_POST['deadline']) ? $_POST['deadline'] : date('Y-m-d', strtotime('+7 days')),
-                'status' => $_POST['status'] ?? 'pending'
+                'status' => $_POST['status'] ?? 'pending',
+                'assigned_users' => $_POST['assigned_users'] ?? []
             ];
 
             // Robust Validation
-            if (empty($data['project_name']) || empty($data['role_id'])) {
+            if (empty($data['project_name']) || empty($data['role_ids'])) {
                 echo json_encode(['status' => 'validation_error', 'message' => 'Project name and department are required']);
                 return;
             }
@@ -78,9 +83,11 @@ class ProjectController
                 return;
             }
 
-            if (!$this->roleModel->findById($data['role_id'])) {
-                echo json_encode(['status' => 'validation_error', 'message' => 'Invalid department selected']);
-                return;
+            foreach ($data['role_ids'] as $roleId) {
+                if (!$this->roleModel->findById($roleId)) {
+                    echo json_encode(['status' => 'validation_error', 'message' => 'Invalid department selected']);
+                    return;
+                }
             }
 
             // Check duplicate name
@@ -116,13 +123,14 @@ class ProjectController
                 'project_name' => trim($_POST['project_name'] ?? ''),
                 'client_name' => trim($_POST['client_name'] ?? ''),
                 'description' => trim($_POST['description'] ?? ''),
-                'role_id' => $_POST['role_id'] ?? '',
+                'role_ids' => $_POST['role_ids'] ?? [],
                 'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d'),
                 'deadline' => !empty($_POST['deadline']) ? $_POST['deadline'] : date('Y-m-d'),
-                'status' => $_POST['status'] ?? 'pending'
+                'status' => $_POST['status'] ?? 'pending',
+                'assigned_users' => $_POST['assigned_users'] ?? []
             ];
 
-            if (empty($data['project_name']) || empty($data['role_id'])) {
+            if (empty($data['project_name']) || empty($data['role_ids'])) {
                 echo json_encode(['status' => 'error', 'message' => 'Project name and department are required']);
                 return;
             }
@@ -132,9 +140,11 @@ class ProjectController
                 return;
             }
 
-            if (!$this->roleModel->findById($data['role_id'])) {
-                echo json_encode(['status' => 'error', 'message' => 'Invalid department selected']);
-                return;
+            foreach ($data['role_ids'] as $roleId) {
+                if (!$this->roleModel->findById($roleId)) {
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid department selected']);
+                    return;
+                }
             }
 
             if ($this->projectModel->update($id, $data)) {

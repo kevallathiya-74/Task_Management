@@ -7,9 +7,6 @@
                     <li class="breadcrumb-item active">Staff Report</li>
                 </ol>
             </nav>
-            <button class="btn btn-primary rounded-pill px-4" id="btn-download-pdf">
-                <i class="fas fa-file-pdf me-2"></i>Download PDF
-            </button>
         </div>
 
         <div id="report-printable-area">
@@ -131,16 +128,6 @@ $(document).ready(function() {
     $('#report-duration-select').on('change', function() {
         loadReportData();
     });
-
-    $('#btn-download-pdf').on('click', function() {
-        const userId = '<?= $user['id'] ?>';
-        const duration = $('#report-duration-select').val();
-        
-        // Log the report generation
-        $.post('<?= url('/api/admin/kpi/log-report') ?>', { user_id: userId, duration: duration }, function() {
-            window.print();
-        });
-    });
 });
 
 function loadReportData() {
@@ -151,7 +138,7 @@ function loadReportData() {
     $('#print-period-display').text(`Period: ${durationLabel}`);
 
     $.get('<?= url('/api/admin/kpi/staff-report-data') ?>', { user_id: userId, duration: duration }, function(res) {
-        if (res.success) {
+        if (res.status === 'success' || res.success) {
             updateSummary(res.stats);
             updateDailyHistory(res.history);
             updateTrendChart(res.history);

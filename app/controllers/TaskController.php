@@ -84,7 +84,8 @@ class TaskController
                 $data = [
                     'project_id' => $rawTask['project_id'] ?? '',
                     'assigned_to' => $rawTask['assigned_to'] ?? '',
-                    'role_id' => $rawTask['role_id'] ?? '',
+                    'assigned_users' => $rawTask['assigned_users'] ?? [],
+                    'role_ids' => $rawTask['role_ids'] ?? [],
                     'title' => trim($rawTask['title'] ?? ''),
                     'description' => trim($rawTask['description'] ?? ''),
                     'due_date' => (!empty($rawTask['due_date'])) ? $rawTask['due_date'] . ' ' . ($rawTask['due_time'] ?? '09:00') : date('Y-m-d H:i:s'),
@@ -95,7 +96,7 @@ class TaskController
                     'status_notes' => trim($rawTask['status_notes'] ?? '')
                 ];
 
-                if (empty($data['project_id']) || empty($data['assigned_to']) || empty($data['title'])) {
+                if (empty($data['project_id']) || (empty($data['assigned_to']) && empty($data['assigned_users'])) || empty($data['title'])) {
                     echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Project, Assignee, and Title are required"]);
                     $db->rollBack();
                     return;
@@ -107,10 +108,18 @@ class TaskController
                     $db->rollBack();
                     return;
                 }
-                if (!$this->userModel->findById($data['assigned_to'])) {
-                    echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Invalid assignee selected"]);
-                    $db->rollBack();
-                    return;
+                
+                $assignedUsers = $data['assigned_users'];
+                if (empty($assignedUsers) && !empty($data['assigned_to'])) {
+                    $assignedUsers = [$data['assigned_to']];
+                }
+                
+                foreach ($assignedUsers as $userId) {
+                    if (!$this->userModel->findById($userId)) {
+                        echo json_encode(['status' => 'validation_error', 'message' => "Task #" . ($index + 1) . ": Invalid assignee selected"]);
+                        $db->rollBack();
+                        return;
+                    }
                 }
 
                 if (!$this->taskModel->create($data)) {
@@ -151,7 +160,12 @@ class TaskController
             }
 
             // Authorization check: Admin or Assignee
-            if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
+            $isAssigned = false;
+            if ($task['assigned_to'] === $_SESSION['user_id'] || (isset($task['assigned_users']) && in_array($_SESSION['user_id'], $task['assigned_users']))) {
+                $isAssigned = true;
+            }
+
+            if ($_SESSION['user_role'] !== 'admin' && !$isAssigned) {
                 echo json_encode(['status' => 'error', 'message' => 'You are not authorized to update this task']);
                 return;
             }
@@ -159,7 +173,8 @@ class TaskController
             $data = [
                 'project_id' => $_POST['project_id'] ?? $task['project_id'],
                 'assigned_to' => $_POST['assigned_to'] ?? $task['assigned_to'],
-                'role_id' => $_POST['role_id'] ?? $task['role_id'],
+                'assigned_users' => $_POST['assigned_users'] ?? $task['assigned_users'] ?? [],
+                'role_ids' => $_POST['role_ids'] ?? $task['role_ids'] ?? [],
                 'title' => trim($_POST['title'] ?? $task['title']),
                 'description' => trim($_POST['description'] ?? $task['description']),
                 'status' => $_POST['status'] ?? $task['status'],
@@ -235,7 +250,12 @@ class TaskController
             }
 
             // Authorization check
-            if ($_SESSION['user_role'] !== 'admin' && $task['assigned_to'] !== $_SESSION['user_id']) {
+            $isAssigned = false;
+            if ($task['assigned_to'] === $_SESSION['user_id'] || (isset($task['assigned_users']) && in_array($_SESSION['user_id'], $task['assigned_users']))) {
+                $isAssigned = true;
+            }
+
+            if ($_SESSION['user_role'] !== 'admin' && !$isAssigned) {
                 echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
                 return;
             }
@@ -387,9 +407,16 @@ class TaskController
             $db->beginTransaction();
 
             // 1. Prepare new task data (cloning parent)
+            $assignedUsers = !empty($parentTask['assigned_to_ids']) ? explode(',', $parentTask['assigned_to_ids']) : [];
+            if (empty($assignedUsers) && !empty($parentTask['assigned_to'])) {
+                $assignedUsers = [$parentTask['assigned_to']];
+            }
+
+            // 1. Prepare new task data (cloning parent)
             $newData = [
                 'project_id' => $parentTask['project_id'],
                 'assigned_to' => $parentTask['assigned_to'],
+                'assigned_users' => $assignedUsers,
                 'role_id' => $parentTask['role_id'],
                 'title' => $parentTask['title'],
                 'description' => $parentTask['description'],

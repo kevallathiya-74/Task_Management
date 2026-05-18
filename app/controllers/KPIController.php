@@ -48,6 +48,26 @@ class KPIController
         echo json_encode(['status' => 'success', 'data' => $record]);
     }
 
+    public function getMonthlyReport()
+    {
+        header('Content-Type: application/json');
+        $userId = $_GET['user_id'] ?? '';
+        $month = $_GET['month'] ?? date('n');
+        $year = $_GET['year'] ?? date('Y');
+
+        if (!$userId) {
+            echo json_encode(['status' => 'error', 'message' => 'User ID required']);
+            return;
+        }
+
+        $stats = $this->kpiModel->getMonthlyStats($userId, $month, $year);
+        
+        echo json_encode([
+            'status' => 'success',
+            'stats' => $stats
+        ]);
+    }
+
     public function getStaffReportData()
     {
         header('Content-Type: application/json');

@@ -1,259 +1,105 @@
-REMOVE PUBLISHING REPORT MODULE COMPLETELY
-FULL SYSTEM CLEANUP REQUIRED
+PIN TASK UI DESIGN UPDATE
 
 IMPORTANT:
-Completely DELETE the entire Publishing Report module from the project.
+Current pin task design is incorrect.
 
-REMOVE EVERYTHING related to:
+Pinned tasks should NOT appear like normal todo rows.
 
-* frontend
-* backend
-* database
-* AJAX
-* routes
-* sidebar
-* permissions
-* assignments
-* APIs
-* CSS
-* JS
-* SQL
-* validations
-* modals
-* rendering
-* save logic
+When:
+admin selects "Pin Task"
 
-THIS MUST BE A COMPLETE CLEAN REMOVAL.
+AND:
+creates todo
 
-==================================================
-REMOVE FROM FRONTEND
-====================
+THEN:
+show task inside dedicated stacked boxes.
 
-DELETE:
+Pinned task section should look like:
 
-* Publishing Report button
-* Publishing Report page
-* Publishing Report modal
-* Publishing Report tables
-* row editor
-* color picker
-* assignment dropdown
-* Add Row buttons
-* SAVE button
-* Publishing Report filters
-* Publishing Report sections
+---
 
-==================================================
-REMOVE FROM SIDEBAR
-===================
++----------------------------------+
+| Pin Task Title                   || Date + Time                      |
++----------------------------------+
 
-DELETE:
++----------------------------------+
+| Pin Task Title                   || Date + Time                      |
++----------------------------------+
 
-* Publishing Report navigation item
-* Publishing Report routes
-* menu references
++----------------------------------+
+| Pin Task Title                   || Date + Time                      |
++----------------------------------+
 
-==================================================
-REMOVE FROM JAVASCRIPT
-======================
+---
 
-DELETE ALL:
+ONLY SHOW:
 
-* publishing-report.js
-* publishing handlers
-* dynamic row logic
-* assignment logic
-* color selection logic
-* autosave logic
-* report rendering logic
-* AJAX calls
-* event listeners
+* Task Title
+* Date
+* Time
 
-==================================================
-REMOVE FROM BACKEND
-===================
+DO NOT SHOW:
 
-DELETE:
+* assigned user
+* status
+* buttons
+* priority
+* description
+* notes
+* progress
 
-* save-report.php
-* fetch-report.php
-* assignment APIs
-* report APIs
-* row APIs
-* cell APIs
-* Publishing Report controllers
-* helper functions
-* report services
+Each pin task card:
 
-==================================================
-REMOVE FROM DATABASE
-====================
+* full width
+* medium height
+* rounded corners
+* soft border
+* glassmorphism light effect
+* subtle purple left border
+* spacing between cards
+* hover animation
 
-DELETE ALL TABLES RELATED TO:
+Create dedicated section:
 
-* publishing_reports
-* report_rows
-* report_cells
-* report_assignments
-* publishing_templates
-* recurring_reports
+Pinned Tasks
 
-==================================================
-REMOVE FOREIGN KEYS
-===================
+Position:
+TOP of Todo page.
 
-DELETE:
+Normal todos remain separate below.
 
-* foreign keys
-* indexes
-* constraints
-* triggers
-* relations
+Example:
 
-==================================================
-SQL CLEANUP REQUIRED
-====================
+18 May 2026 10:30 AM
 
-Create safe cleanup SQL.
+Use existing:
+created_at timestamp.
 
-DROP:
+No extra fields needed.
 
-* tables
-* indexes
-* constraints
-* orphan references
+Desktop:
+stack vertically
 
-VERIFY:
-no broken references remain.
+Tablet:
+full width cards
 
-==================================================
-REMOVE FROM TASK FLOW
-=====================
+Mobile:
+compact cards
 
-DELETE:
+Use:
+modern SaaS productivity app design.
 
-* Publishing Report task creation
-* report-based task logic
-* recurring report logic
-* report assignment flow
+Do NOT:
+change existing todo logic.
 
-==================================================
-REMOVE FROM USER DASHBOARD
-==========================
+Only:
+change pinned task rendering UI.
 
-DELETE:
+Pinned tasks should feel like:
 
-* report rendering
-* assigned report sections
-* report visibility logic
-* report filtering
+* sticky reminders
+* always visible notes
+* lightweight work instructions
 
-==================================================
-REMOVE FROM ADMIN PANEL
-=======================
-
-DELETE:
-
-* report management
-* report assignment UI
-* report permissions
-* report actions
-
-==================================================
-REMOVE CSS
-==========
-
-DELETE:
-
-* report table styles
-* report colors
-* report layouts
-* report responsive rules
-
-==================================================
-REMOVE AJAX ENDPOINTS
-=====================
-
-DELETE:
-
-* saveReport
-* fetchReport
-* assignReport
-* updateCell
-* updateColor
-* createRow
-
-==================================================
-REMOVE VALIDATION LOGIC
-=======================
-
-DELETE:
-
-* duplicate row validation
-* assignment validation
-* report validation
-* report title validation
-
-==================================================
-REMOVE ROUTES
-=============
-
-DELETE:
-
-* /publishing-report
-* /save-report
-* /fetch-report
-* /assign-report
-
-==================================================
-REMOVE SESSION DATA
-===================
-
-DELETE:
-
-* report session state
-* report cache
-* report temp state
-
-==================================================
-VERIFY CLEANUP
-==============
-
-After removal:
-VERIFY:
-
-1. no sidebar links remain
-2. no console errors
-3. no broken imports
-4. no PHP include errors
-5. no orphan SQL tables
-6. no AJAX failures
-7. no broken dashboard rendering
-8. no dead routes
-
-==================================================
-IMPORTANT
-=========
-
-DO NOT:
-
-* break Task Management
-* break KPI system
-* break Leave Management
-* break authentication
-* break dashboard
-
-ONLY remove Publishing Report module.
-
-==================================================
-FINAL GOAL
-==========
-
-System should become:
-
-* cleaner
-* lighter
-* stable
-* maintainable
-
-WITHOUT ANY Publishing Report code remaining anywhere in project.
+NOT like:
+task table rows.

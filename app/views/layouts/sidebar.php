@@ -38,6 +38,22 @@
                     <span>Tasks</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="<?= url("/$prefix/publishing") ?>" class="nav-link <?= $active_page == 'publishing' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Publishing Report">
+                    <div class="nav-icon-container">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <span>Publishing Report</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="<?= url("/$prefix/todo") ?>" class="nav-link <?= $active_page == 'todo' ? 'active' : '' ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Todo List">
+                    <div class="nav-icon-container">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <span>Todo List</span>
+                </a>
+            </li>
         </ul>
 
         <?php if ($prefix == 'admin'): ?>

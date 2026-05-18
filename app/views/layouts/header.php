@@ -51,6 +51,11 @@
     <!-- Moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     
+    <!-- Global JS Variables -->
+    <script>
+        const BASE_URL = '<?= url('/') ?>';
+    </script>
+    
     <!-- Custom JS -->
     <script src="<?= asset('js/main.js') ?>"></script>
     

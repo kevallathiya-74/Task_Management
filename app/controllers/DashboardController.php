@@ -61,14 +61,30 @@ class DashboardController
         $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Growth Analysis (Last 7 Days)
+        $stmt = $this->db->query("
+            SELECT DATE(created_at) as date, COUNT(*) as count 
+            FROM tasks 
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+            AND deleted_at IS NULL 
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        $growth_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Map to ensure all 7 days are present
         $growth = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = date('Y-m-d', strtotime("-$i days"));
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE DATE(created_at) = :date AND deleted_at IS NULL");
-            $stmt->execute(['date' => $date]);
+            $count = 0;
+            foreach ($growth_data as $g) {
+                if ($g['date'] === $date) {
+                    $count = $g['count'];
+                    break;
+                }
+            }
             $growth[] = [
                 'date' => $date,
-                'count' => $stmt->fetchColumn()
+                'count' => (int)$count
             ];
         }
 
@@ -146,12 +162,32 @@ class DashboardController
 
     private function getStats()
     {
+        // Combine projects counts
+        $projectStats = $this->db->query("
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+            FROM projects 
+            WHERE deleted_at IS NULL
+        ")->fetch(PDO::FETCH_ASSOC);
+
+        // Combine tasks counts
+        $taskStats = $this->db->query("
+            SELECT 
+                SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+            FROM tasks 
+            WHERE deleted_at IS NULL
+        ")->fetch(PDO::FETCH_ASSOC);
+
         return [
-            'total_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE deleted_at IS NULL")->fetchColumn(),
-            'active_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE status = 'active' AND deleted_at IS NULL")->fetchColumn(),
-            'active_tasks' => $this->db->query("SELECT COUNT(*) FROM tasks WHERE status != 'completed' AND deleted_at IS NULL")->fetchColumn(),
+            'total_projects' => (int)$projectStats['total'],
+            'active_projects' => (int)$projectStats['active'],
+            'active_tasks' => (int)$taskStats['in_progress'],
+            'pending_tasks' => (int)$taskStats['pending'],
             'total_staff' => $this->db->query("SELECT COUNT(*) FROM users WHERE deleted_at IS NULL")->fetchColumn(),
-            'completed_projects' => $this->db->query("SELECT COUNT(*) FROM projects WHERE status = 'completed' AND deleted_at IS NULL")->fetchColumn()
+            'completed_projects' => (int)$projectStats['completed']
         ];
     }
 

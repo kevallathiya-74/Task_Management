@@ -22,6 +22,12 @@ $router->get('/staff/projects', 'ProjectController@index');
 
 $router->get('/admin/tasks', 'TaskController@index');
 $router->get('/staff/tasks', 'TaskController@index');
+ 
+$router->get('/admin/todo', 'TodoController@index');
+$router->get('/staff/todo', 'TodoController@index');
+
+$router->get('/admin/publishing', 'PublishingController@index');
+$router->get('/staff/publishing', 'PublishingController@index');
 
 $router->get('/admin/kpi', 'KPIController@index');
 $router->get('/admin/kpi/staff-report', 'KPIController@staffReport');

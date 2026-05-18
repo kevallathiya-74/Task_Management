@@ -12,7 +12,7 @@
 
         <!-- Statistics Grid -->
         <div class="row g-4 mb-5">
-            <div class="col-xl-3 col-md-6">
+            <div class="col-xl col-md-6">
                 <div class="glass-card p-4 h-100 position-relative overflow-hidden">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-shape bg-primary-soft rounded-3">
@@ -23,7 +23,7 @@
                     <p class="text-neutral-500 text-xs fw-bold text-uppercase mb-0 ls-1">Total Projects</p>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6">
+            <div class="col-xl col-md-6">
                 <div class="glass-card p-4 h-100 position-relative overflow-hidden">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-shape bg-warning-soft rounded-3">
@@ -34,7 +34,18 @@
                     <p class="text-neutral-500 text-xs fw-bold text-uppercase mb-0 ls-1">Active Tasks</p>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6">
+            <div class="col-xl col-md-6">
+                <div class="glass-card p-4 h-100 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-shape bg-danger-soft rounded-3">
+                            <i class="fas fa-clock text-danger"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold text-neutral-900 mb-1"><?= $stats['pending_tasks'] ?></h2>
+                    <p class="text-neutral-500 text-xs fw-bold text-uppercase mb-0 ls-1">Pending Tasks</p>
+                </div>
+            </div>
+            <div class="col-xl col-md-6">
                 <div class="glass-card p-4 h-100 position-relative overflow-hidden">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-shape bg-success-soft rounded-3">
@@ -45,7 +56,7 @@
                     <p class="text-neutral-500 text-xs fw-bold text-uppercase mb-0 ls-1">Finished Projects</p>
                 </div>
             </div>
-            <div class="col-xl-3 col-md-6">
+            <div class="col-xl col-md-6">
                 <div class="glass-card p-4 h-100 position-relative overflow-hidden">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-shape bg-info-soft rounded-3">
@@ -159,7 +170,7 @@
                             <h5 class="fw-bold text-neutral-900 mb-1">Growth Analysis</h5>
                             <p class="text-xs text-neutral-400 mb-0">Visualizing team productivity and task completion velocity</p>
                         </div>
-                        <select class="form-select border-0 bg-neutral-50 rounded-pill" style="width: auto; height: 38px; min-height: 38px;">
+                        <select class="form-select border border-neutral-200 bg-white rounded-pill px-3" style="width: auto; height: 45px; min-height: 45px;">
                             <option>Last 7 Days</option>
                             <option>Last 30 Days</option>
                         </select>
@@ -251,6 +262,7 @@ function loadChartData() {
                     scales: {
                         y: { 
                             beginAtZero: true, 
+                            suggestedMax: 5,
                             grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false },
                             ticks: { color: '#94a3b8', font: { weight: '600' } }
                         },

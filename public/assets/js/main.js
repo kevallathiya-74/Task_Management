@@ -3,6 +3,18 @@
  */
 
 $(document).ready(function() {
+    // Global AJAX Setup for Session Timeout
+    $.ajaxSetup({
+        statusCode: {
+            401: function() {
+                toastr.error('Session expired. Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = BASE_URL + '/login';
+                }, 1500);
+            }
+        }
+    });
+
     // Handle Mobile/Collapsible Sidebar
     const sidebar = $('#sidebar');
     const body = $('body');

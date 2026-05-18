@@ -1,4 +1,37 @@
 <?php require_once ROOT_PATH . '/app/views/layouts/topbar.php'; ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.select2-container--default .select2-selection--multiple {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 10px !important;
+    min-height: 45px !important;
+    padding: 4px !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #8b5cf6 !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 20px !important;
+    padding: 2px 10px !important;
+    font-size: 0.8rem !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white !important;
+    margin-right: 5px !important;
+    border: none !important;
+    background: transparent !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: rgba(255,255,255,0.8) !important;
+}
+.select2-container--default .select2-dropdown {
+    border-radius: 10px !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    background-color: white !important;
+}
+</style>
 
 <main class="main-content">
     <div class="container-fluid animate-fade-up">
@@ -144,8 +177,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-xs fw-bold text-neutral-500 text-uppercase ms-1 mb-2">Assign Team Lead</label>
-                                    <select class="form-select glass-input text-sm" name="tasks[0][assigned_to]" required>
-                                        <option value="" selected disabled>Select Member...</option>
+                                    <select class="form-select glass-input text-sm select2-multi" name="tasks[0][assigned_users][]" multiple required data-placeholder="Select Members...">
                                         <?php foreach ($staff as $s): ?>
                                             <option value="<?= $s['id'] ?>"><?= $s['full_name'] ?> (<?= $s['role_name'] ?>)</option>
                                         <?php endforeach; ?>
@@ -156,8 +188,7 @@
                             <div class="row g-4 mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label text-xs fw-bold text-neutral-500 text-uppercase ms-1 mb-2">Department</label>
-                                    <select class="form-select glass-input text-sm" name="tasks[0][role_id]" required>
-                                        <option value="" selected disabled>Select Department...</option>
+                                    <select class="form-select glass-input text-sm select2-multi" name="tasks[0][role_ids][]" multiple required data-placeholder="Select Departments...">
                                         <?php foreach ($roles as $r): ?>
                                             <option value="<?= $r['id'] ?>"><?= $r['name'] ?></option>
                                         <?php endforeach; ?>
@@ -264,7 +295,7 @@
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label class="form-label text-xs fw-bold text-neutral-500 text-uppercase ms-1 mb-2">Assigned To</label>
-                            <select class="form-select glass-input text-sm" name="assigned_to" id="edit_assigned_to" required>
+                            <select class="form-select glass-input text-sm select2-multi" name="assigned_users[]" id="edit_assigned_users" multiple required data-placeholder="Select Members...">
                                 <?php foreach ($staff as $s): ?>
                                     <option value="<?= $s['id'] ?>"><?= $s['full_name'] ?></option>
                                 <?php endforeach; ?>
@@ -272,7 +303,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-xs fw-bold text-neutral-500 text-uppercase ms-1 mb-2">Department</label>
-                            <select class="form-select glass-input text-sm" name="role_id" id="edit_role_id" required>
+                            <select class="form-select glass-input text-sm select2-multi" name="role_ids[]" id="edit_role_ids" multiple required data-placeholder="Select Departments...">
                                 <?php foreach ($roles as $r): ?>
                                     <option value="<?= $r['id'] ?>"><?= $r['name'] ?></option>
                                 <?php endforeach; ?>
@@ -353,8 +384,18 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
+    $('.select2-multi').each(function() {
+        $(this).select2({
+            placeholder: $(this).data('placeholder') || 'Select...',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $(this).closest('.modal')
+        });
+    });
+
     const table = $('#tasksTable').DataTable({
         ajax: {
             url: '<?= url('/api/tasks') ?>',
@@ -444,17 +485,31 @@ $(document).ready(function() {
                 }
             },
             { 
-                data: 'assigned_to_name',
+                data: 'assigned_to_names',
                 render: function(data, type, row) {
-                    const name = data || 'Unassigned';
-                    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                    return `
-                        <div class="d-flex align-items-center py-2">
-                            <div class="rounded-circle bg-primary-grad text-white d-flex align-items-center justify-content-center fw-bold me-3 shadow-sm border border-2 border-white" style="width: 40px; height: 40px; min-width: 40px; font-size: 0.8rem;">
+                    const names = data ? data.split(', ') : [];
+                    const ids = row.assigned_to_ids ? row.assigned_to_ids.split(', ') : [];
+                    
+                    let avatarsHtml = '';
+                    names.forEach((name, index) => {
+                        const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        avatarsHtml += `
+                            <div class="rounded-circle bg-primary-grad text-white d-flex align-items-center justify-content-center fw-bold shadow-sm border border-2 border-white" style="width: 32px; height: 32px; min-width: 32px; font-size: 0.7rem; margin-left: ${index > 0 ? '-10px' : '0'}; z-index: ${10 - index}; cursor: pointer;" title="${name}">
                                 ${initials}
                             </div>
-                            <div class="d-flex flex-column justify-content-center">
-                                <div class="fw-bold text-neutral-900 font-outfit text-sm lh-1 mb-1">${name}</div>
+                        `;
+                    });
+                    
+                    if (avatarsHtml === '') {
+                        avatarsHtml = '<span class="text-neutral-400">Unassigned</span>';
+                    }
+                    
+                    return `
+                        <div class="d-flex align-items-center py-2">
+                            <div class="d-flex">
+                                ${avatarsHtml}
+                            </div>
+                            <div class="ms-3 d-none d-xl-block">
                                 <div class="text-xs text-neutral-400 fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.02em;">${row.role_name || 'Member'}</div>
                             </div>
                         </div>
@@ -562,6 +617,10 @@ $(document).ready(function() {
         const firstBlock = $('.task-block-card').first();
         const newBlock = firstBlock.clone();
         
+        // Remove Select2 wrapper and show original select
+        newBlock.find('.select2-container').remove();
+        newBlock.find('.select2-multi').removeClass('select2-hidden-accessible').removeAttr('data-select2-id').show();
+        
         // Reset values and update indices
         newBlock.find('input, select, textarea').each(function() {
             const name = $(this).attr('name');
@@ -575,7 +634,7 @@ $(document).ready(function() {
                     $(this).val(0);
                 }
             } else if ($(this).is('select')) {
-                $(this).prop('selectedIndex', 0);
+                $(this).val([]); // Reset multi-select
             }
         });
 
@@ -590,7 +649,17 @@ $(document).ready(function() {
         newBlock.find('.remove-task-block').removeClass('d-none');
         
         // Append with animation
-        newBlock.hide().appendTo('#task-blocks-container').slideDown(400);
+        newBlock.hide().appendTo('#task-blocks-container').slideDown(400, function() {
+            // Initialize Select2 on the new block
+            $(this).find('.select2-multi').each(function() {
+                $(this).select2({
+                    placeholder: $(this).data('placeholder') || 'Select...',
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $(this).closest('.modal')
+                });
+            });
+        });
         taskCount++;
     });
 
@@ -639,8 +708,10 @@ $(document).ready(function() {
         $('#edit_project_id').val(data.project_id);
         $('#edit_title').val(data.title);
         $('#edit_description').val(data.description);
-        $('#edit_assigned_to').val(data.assigned_to);
-        $('#edit_role_id').val(data.role_id);
+        const assignedIds = data.assigned_to_ids ? data.assigned_to_ids.split(', ') : [];
+        $('#edit_assigned_users').val(assignedIds).trigger('change');
+        const roleIds = data.role_ids_csv ? data.role_ids_csv.split(',') : [];
+        $('#edit_role_ids').val(roleIds).trigger('change');
         $('#edit_priority').val(data.priority);
         $('#edit_status').val(data.status);
         if (data.due_date) {

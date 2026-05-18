@@ -39,11 +39,11 @@ class KPI
             INSERT INTO kpi_records (
                 id, user_id, kpi_date, productivity_score, quality_score, 
                 discipline_score, communication_score, growth_score, weighted_total_score, 
-                salary_approval_percentage, performance_status, admin_notes, created_by
+                salary_approval_percentage, performance_status, admin_notes
             ) VALUES (
                 :id, :user_id, :kpi_date, :productivity, :quality, 
                 :discipline, :communication, :growth, :total, 
-                :salary, :status, :notes, :created_by
+                :salary, :status, :notes
             )
         ");
         
@@ -59,8 +59,7 @@ class KPI
             'total' => $data['weighted_total_score'],
             'salary' => $data['salary_approval_percentage'],
             'status' => $data['performance_status'],
-            'notes' => $data['admin_notes'],
-            'created_by' => $_SESSION['user_id']
+            'notes' => $data['admin_notes']
         ]);
     }
 

@@ -1,8 +1,8 @@
 -- Taskly: Task Management & Performance SaaS Database Schema
 -- Last Updated: 2026-05-14
 
-CREATE DATABASE IF NOT EXISTS task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE task_management;
+CREATE DATABASE IF NOT EXISTS deckoid_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE deckoid_task_management;
 
 -- 1. Roles Table (Departments/Modules)
 CREATE TABLE IF NOT EXISTS roles (
@@ -200,6 +200,77 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- 12. Publishing Reports Table
+CREATE TABLE IF NOT EXISTS publishing_reports (
+    id CHAR(36) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    report_month INT NULL,
+    report_year INT NULL,
+    total_days INT DEFAULT 15,
+    created_by CHAR(36) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE RESTRICT,
+    UNIQUE KEY unique_month_year (report_month, report_year)
+) ENGINE=InnoDB;
+
+-- 13. Publishing Sections Table
+CREATE TABLE IF NOT EXISTS publishing_sections (
+    id CHAR(36) PRIMARY KEY,
+    report_id CHAR(36) NOT NULL,
+    section_key VARCHAR(50) NOT NULL, -- facebook_ads, posts, reels
+    section_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (report_id) REFERENCES publishing_reports(id) ON DELETE CASCADE,
+    UNIQUE KEY (report_id, section_key)
+) ENGINE=InnoDB;
+
+-- 14. Publishing Rows Table
+CREATE TABLE IF NOT EXISTS publishing_rows (
+    id CHAR(36) PRIMARY KEY,
+    section_id CHAR(36) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    assigned_users_json JSON NULL, -- Array of user IDs
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (section_id) REFERENCES publishing_sections(id) ON DELETE CASCADE,
+    UNIQUE KEY (section_id, title)
+) ENGINE=InnoDB;
+
+-- 15. Publishing Cells Table
+CREATE TABLE IF NOT EXISTS publishing_cells (
+    id CHAR(36) PRIMARY KEY,
+    row_id CHAR(36) NOT NULL,
+    day_number INT NOT NULL,
+    cell_value VARCHAR(255) NULL,
+    status_color VARCHAR(20) NULL, -- yellow, orange, green, empty
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (row_id) REFERENCES publishing_rows(id) ON DELETE CASCADE,
+    UNIQUE KEY (row_id, day_number)
+) ENGINE=InnoDB;
+
+
+-- 12. Todo Lists Table
+CREATE TABLE IF NOT EXISTS todo_lists (
+    id CHAR(36) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    assigned_to CHAR(36) NOT NULL,
+    assigned_by CHAR(36) NOT NULL,
+    status ENUM('pending','completed') DEFAULT 'pending',
+    priority ENUM('low','medium','high') DEFAULT 'medium',
+    notes TEXT NULL,
+    is_pinned TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX (assigned_to),
+    INDEX (status),
+    INDEX (created_at)
+) ENGINE=InnoDB;
+
 
 -- ==========================================
 -- SEED DATA
@@ -217,7 +288,8 @@ INSERT IGNORE INTO roles (id, name, slug) VALUES
 ('9d0e1f2a-3b4c-4d5e-8f6a-7b8c9d0e1f2a', 'Social Media Management', 'smm'),
 ('3b4c5d6e-7f8a-4b9c-bd0e-1f2a3b4c5d6e', 'AI Video Making', 'ai_video'),
 ('20e3f4a5-6b7c-8d9e-a0b1-c2d3e4f5a6b7', 'Client Management', 'client_management'),
-('ce41eb64-5059-11f1-8ccd-309c2374f21d', 'Marketing Manager', 'marketing_manager');
+('ce41eb64-5059-11f1-8ccd-309c2374f21d', 'Marketing Manager', 'marketing_manager'),
+('4b1d3e2f-5e6a-4b7c-8d9e-0f1a2b3c4d5e', 'AI Products', 'ai_products');
 
 -- Seed Super Admin User (Default Password: 1234)
 -- Note: Replace password_hash with a secure bcrypt hash in production.

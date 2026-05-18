@@ -1,4 +1,35 @@
 <?php require_once ROOT_PATH . '/app/views/layouts/topbar.php'; ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.select2-container--default .select2-selection--multiple {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 10px !important;
+    min-height: 45px !important;
+    padding: 4px !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #8b5cf6 !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 20px !important;
+    padding: 2px 10px !important;
+    font-size: 0.8rem !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white !important;
+    margin-right: 5px !important;
+    border: none !important;
+    background: transparent !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: rgba(255,255,255,0.8) !important;
+}
+.select2-container--default .select2-dropdown {
+    border-radius: 10px !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+</style>
 
 <main class="main-content">
     <div class="container-fluid animate-fade-up">
@@ -101,16 +132,23 @@
                         <textarea class="form-control rounded-4" name="description" rows="3" placeholder="Detail the core objectives and deliverables..."></textarea>
                     </div>
                     <div class="row g-4 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">Department Role</label>
-                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold" name="role_id" required>
-                                <option value="">Select Department</option>
+                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold select2-multi" name="role_ids[]" multiple required data-placeholder="Select Departments...">
                                 <?php foreach ($roles as $role): ?>
                                     <option value="<?= $role['id'] ?>"><?= $role['name'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">Assign Team Lead</label>
+                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold select2-multi" name="assigned_users[]" multiple data-placeholder="Select Members...">
+                                <?php foreach ($staff as $s): ?>
+                                    <option value="<?= $s['id'] ?>"><?= $s['full_name'] ?> (<?= $s['role_name'] ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">Status</label>
                             <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold" name="status">
                                 <option value="pending">Pending</option>
@@ -167,15 +205,23 @@
                         <textarea class="form-control rounded-4" name="description" id="edit_description" rows="3"></textarea>
                     </div>
                     <div class="row g-4 mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">Department</label>
-                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold" name="role_id" id="edit_role_id" required>
+                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold select2-multi" name="role_ids[]" id="edit_role_ids" multiple required data-placeholder="Select Departments...">
                                 <?php foreach ($roles as $role): ?>
                                     <option value="<?= $role['id'] ?>"><?= $role['name'] ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">Assign Team Lead</label>
+                            <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold select2-multi" name="assigned_users[]" id="edit_assigned_users" multiple data-placeholder="Select Members...">
+                                <?php foreach ($staff as $s): ?>
+                                    <option value="<?= $s['id'] ?>"><?= $s['full_name'] ?> (<?= $s['role_name'] ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label text-xs fw-bold text-neutral-400 text-uppercase ms-1 mb-2">State</label>
                             <select class="form-select border-0 bg-neutral-50 rounded-4 text-sm fw-bold" name="status" id="edit_status">
                                 <option value="pending">Pending</option>
@@ -204,8 +250,21 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
+    $('#addProjectModal .select2-multi').select2({
+        placeholder: 'Select Members...',
+        allowClear: true,
+        dropdownParent: $('#addProjectModal')
+    });
+
+    $('#editProjectModal .select2-multi').select2({
+        placeholder: 'Select Members...',
+        allowClear: true,
+        dropdownParent: $('#editProjectModal')
+    });
+
     const table = $('#projectsTable').DataTable({
         ajax: {
             url: '<?= url('/api/projects') ?>',
@@ -342,10 +401,15 @@ $(document).ready(function() {
         $('#edit_project_name').val(data.project_name);
         $('#edit_client_name').val(data.client_name);
         $('#edit_description').val(data.description);
-        $('#edit_role_id').val(data.role_id);
+        const roleIds = data.role_ids_csv ? data.role_ids_csv.split(',') : [];
+        $('#edit_role_ids').val(roleIds).trigger('change');
         $('#edit_status').val(data.status);
         $('#edit_start_date').val(data.start_date);
         $('#edit_deadline').val(data.deadline);
+        
+        const assignedUsers = data.assigned_users_csv ? data.assigned_users_csv.split(',') : [];
+        $('#edit_assigned_users').val(assignedUsers).trigger('change');
+        
         $('#editProjectModal').modal('show');
     });
 

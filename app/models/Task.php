@@ -17,19 +17,19 @@ class Task
     {
         $sql = "
             SELECT 
-                t.id, t.project_id, t.assigned_to, t.role_id, t.title, t.description, 
+                t.id, t.project_id, t.assigned_to, t.title, t.description, 
                 t.status, t.is_completed, t.is_incomplete, t.status_notes, 
                 t.progress_percentage, t.due_date, t.due_time, t.priority, 
                 t.completed_at, t.admin_alert_sent, t.created_at, t.updated_at,
                 t.is_recurring, t.recurring_type, t.recurring_parent_id, 
                 t.next_repeat_date, t.repeat_status,
                 p.project_name, p.client_name,
-                u.full_name as assigned_to_name, 
-                r.name as role_name
+                (SELECT GROUP_CONCAT(r.name SEPARATOR ', ') FROM task_departments td JOIN roles r ON td.role_id = r.id WHERE td.task_id = t.id) as role_name,
+                (SELECT GROUP_CONCAT(td.role_id) FROM task_departments td WHERE td.task_id = t.id) as role_ids_csv,
+                (SELECT GROUP_CONCAT(u.full_name SEPARATOR ', ') FROM task_assignments ta JOIN users u ON ta.user_id = u.id WHERE ta.task_id = t.id) as assigned_to_names,
+                (SELECT GROUP_CONCAT(ta.user_id) FROM task_assignments ta WHERE ta.task_id = t.id) as assigned_to_ids
             FROM tasks t
             JOIN projects p ON t.project_id = p.id
-            JOIN users u ON t.assigned_to = u.id
-            JOIN roles r ON t.role_id = r.id
             WHERE t.deleted_at IS NULL
         ";
         
@@ -40,7 +40,7 @@ class Task
         }
         
         if (!empty($filters['assigned_to'])) {
-            $sql .= " AND t.assigned_to = :assigned_to";
+            $sql .= " AND (t.assigned_to = :assigned_to OR t.id IN (SELECT task_id FROM task_assignments WHERE user_id = :assigned_to))";
             $params['assigned_to'] = $filters['assigned_to'];
         }
 
@@ -54,6 +54,7 @@ class Task
             $params['role_id'] = $filters['role_id'];
         }
 
+        $sql .= " GROUP BY t.id";
         $sql .= " ORDER BY t.due_date ASC";
         
         $stmt = $this->db->prepare($sql);
@@ -69,11 +70,13 @@ class Task
             VALUES (:id, :project_id, :assigned_to, :role_id, :title, :description, :status, :due_date, :due_time, :priority, :progress_percentage, :status_notes, :is_completed, :is_incomplete, :admin_alert_sent, :is_recurring, :recurring_type, :recurring_parent_id, :next_repeat_date, :repeat_status)
         ");
         
+        $role_id = !empty($data['role_ids']) ? $data['role_ids'][0] : '';
+        
         $result = $stmt->execute([
             'id' => $id,
             'project_id' => $data['project_id'],
-            'assigned_to' => $data['assigned_to'],
-            'role_id' => $data['role_id'],
+            'assigned_to' => $data['assigned_to'] ?: (!empty($data['assigned_users']) ? $data['assigned_users'][0] : ''),
+            'role_id' => $role_id,
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'] ?? 'pending',
@@ -91,7 +94,34 @@ class Task
             'next_repeat_date' => $data['next_repeat_date'] ?? null,
             'repeat_status' => $data['repeat_status'] ?? 'active'
         ]);
+ 
+        if ($result) {
+            // Save departments
+            if (!empty($data['role_ids'])) {
+                $stmtInsDept = $this->db->prepare("INSERT INTO task_departments (id, task_id, role_id) VALUES (:id, :task_id, :role_id)");
+                foreach ($data['role_ids'] as $roleId) {
+                    $stmtInsDept->execute([
+                        'id' => $this->generateUuid(),
+                        'task_id' => $id,
+                        'role_id' => $roleId
+                    ]);
+                }
+            }
 
+            $assignedUsers = $data['assigned_users'] ?? [];
+            if (empty($assignedUsers) && !empty($data['assigned_to'])) {
+                $assignedUsers = [$data['assigned_to']];
+            }
+            
+            foreach ($assignedUsers as $userId) {
+                $stmtIns = $this->db->prepare("INSERT INTO task_assignments (id, task_id, user_id) VALUES (:id, :task_id, :user_id)");
+                $stmtIns->execute([
+                    'id' => $this->generateUuid(),
+                    'task_id' => $id,
+                    'user_id' => $userId
+                ]);
+            }
+        }
         return $result ? $id : false;
     }
 
@@ -122,10 +152,12 @@ class Task
             WHERE `id` = :id
         ");
         
-        return $stmt->execute([
+        $role_id = !empty($data['role_ids']) ? $data['role_ids'][0] : '';
+        
+        $result = $stmt->execute([
             'id' => $id,
-            'assigned_to' => $data['assigned_to'],
-            'role_id' => $data['role_id'],
+            'assigned_to' => $data['assigned_to'] ?: (!empty($data['assigned_users']) ? $data['assigned_users'][0] : ''),
+            'role_id' => $role_id,
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'status' => $data['status'],
@@ -145,6 +177,43 @@ class Task
             'next_repeat_date' => $data['next_repeat_date'] ?? null,
             'repeat_status' => $data['repeat_status'] ?? 'active'
         ]);
+ 
+        if ($result) {
+            // Sync departments
+            $stmtDelDept = $this->db->prepare("DELETE FROM task_departments WHERE task_id = :task_id");
+            $stmtDelDept->execute(['task_id' => $id]);
+ 
+            if (!empty($data['role_ids'])) {
+                $stmtInsDept = $this->db->prepare("INSERT INTO task_departments (id, task_id, role_id) VALUES (:id, :task_id, :role_id)");
+                foreach ($data['role_ids'] as $roleId) {
+                    $stmtInsDept->execute([
+                        'id' => $this->generateUuid(),
+                        'task_id' => $id,
+                        'role_id' => $roleId
+                    ]);
+                }
+            }
+
+            // Sync assignments
+            $stmtDel = $this->db->prepare("DELETE FROM task_assignments WHERE task_id = :task_id");
+            $stmtDel->execute(['task_id' => $id]);
+            
+            $assignedUsers = $data['assigned_users'] ?? [];
+            if (empty($assignedUsers) && !empty($data['assigned_to'])) {
+                $assignedUsers = [$data['assigned_to']];
+            }
+            
+            foreach ($assignedUsers as $userId) {
+                $stmtIns = $this->db->prepare("INSERT INTO task_assignments (id, task_id, user_id) VALUES (:id, :task_id, :user_id)");
+                $stmtIns->execute([
+                    'id' => $this->generateUuid(),
+                    'task_id' => $id,
+                    'user_id' => $userId
+                ]);
+            }
+        }
+        
+        return $result;
     }
 
     public function softDelete($id)
@@ -157,7 +226,19 @@ class Task
     {
         $stmt = $this->db->prepare("SELECT * FROM tasks WHERE id = :id AND deleted_at IS NULL");
         $stmt->execute(['id' => $id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        $task = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if ($task) {
+            $stmt = $this->db->prepare("SELECT user_id FROM task_assignments WHERE task_id = :id");
+            $stmt->execute(['id' => $id]);
+            $task['assigned_users'] = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+            $stmt = $this->db->prepare("SELECT role_id FROM task_departments WHERE task_id = :id");
+            $stmt->execute(['id' => $id]);
+            $task['role_ids'] = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        }
+        
+        return $task;
     }
 
     public function countAll()
@@ -168,15 +249,15 @@ class Task
 
     public function countByUser($userId)
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE assigned_to = :user_id AND deleted_at IS NULL");
-        $stmt->execute(['user_id' => $userId]);
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE (assigned_to = :user_id1 OR id IN (SELECT task_id FROM task_assignments WHERE user_id = :user_id2)) AND deleted_at IS NULL");
+        $stmt->execute(['user_id1' => $userId, 'user_id2' => $userId]);
         return $stmt->fetchColumn();
     }
 
     public function countByStatusAndUser($status, $userId)
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE status = :status AND assigned_to = :user_id AND deleted_at IS NULL");
-        $stmt->execute(['status' => $status, 'user_id' => $userId]);
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE status = :status AND (assigned_to = :user_id1 OR id IN (SELECT task_id FROM task_assignments WHERE user_id = :user_id2)) AND deleted_at IS NULL");
+        $stmt->execute(['status' => $status, 'user_id1' => $userId, 'user_id2' => $userId]);
         return $stmt->fetchColumn();
     }
 
@@ -186,11 +267,12 @@ class Task
             SELECT t.*, p.project_name 
             FROM tasks t 
             JOIN projects p ON t.project_id = p.id 
-            WHERE t.assigned_to = :user_id AND t.deleted_at IS NULL 
+            WHERE (t.assigned_to = :user_id1 OR t.id IN (SELECT task_id FROM task_assignments WHERE user_id = :user_id2)) AND t.deleted_at IS NULL 
             ORDER BY t.updated_at DESC 
             LIMIT :limit
         ");
-        $stmt->bindValue(':user_id', $userId);
+        $stmt->bindValue(':user_id1', $userId);
+        $stmt->bindValue(':user_id2', $userId);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -210,20 +292,24 @@ class Task
     public function listByPriority($priority, $userId = null)
     {
         $sql = "
-            SELECT t.*, u.full_name as staff_name, p.project_name, r.name as role_name
+            SELECT t.*, p.project_name, r.name as role_name,
+                   GROUP_CONCAT(u.full_name SEPARATOR ', ') as assigned_to_names,
+                   GROUP_CONCAT(u.id SEPARATOR ', ') as assigned_to_ids
             FROM tasks t 
-            JOIN users u ON t.assigned_to = u.id 
             JOIN projects p ON t.project_id = p.id 
             JOIN roles r ON t.role_id = r.id
+            LEFT JOIN task_assignments ta ON t.id = ta.task_id
+            LEFT JOIN users u ON ta.user_id = u.id
             WHERE t.priority = :priority AND t.deleted_at IS NULL
         ";
         
         $params = ['priority' => $priority];
         if ($userId) {
-            $sql .= " AND t.assigned_to = :user_id";
+            $sql .= " AND (t.assigned_to = :user_id OR t.id IN (SELECT task_id FROM task_assignments WHERE user_id = :user_id))";
             $params['user_id'] = $userId;
         }
         
+        $sql .= " GROUP BY t.id";
         $sql .= " ORDER BY t.due_date ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -283,11 +369,14 @@ class Task
     public function getRecurringTasks()
     {
         $stmt = $this->db->prepare("
-            SELECT * FROM tasks 
-            WHERE is_recurring = 1 
-            AND repeat_status = 'active' 
-            AND deleted_at IS NULL 
-            AND (next_repeat_date IS NULL OR next_repeat_date <= CURDATE())
+            SELECT t.*, GROUP_CONCAT(ta.user_id) as assigned_to_ids
+            FROM tasks t 
+            LEFT JOIN task_assignments ta ON t.id = ta.task_id
+            WHERE t.is_recurring = 1 
+            AND t.repeat_status = 'active' 
+            AND t.deleted_at IS NULL 
+            AND (t.next_repeat_date IS NULL OR t.next_repeat_date <= CURDATE())
+            GROUP BY t.id
         ");
         $stmt->execute();
         return $stmt->fetchAll();

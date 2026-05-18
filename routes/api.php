@@ -30,6 +30,13 @@ $router->post('/api/tasks/recurring/disable', 'TaskController@disableRecurring')
 $router->get('/api/tasks/recurring/logs', 'TaskController@recurringLogs');
 $router->post('/api/tasks/recurring/process', 'TaskController@processRecurring');
 
+// Todo Module
+$router->get('/api/todos', 'TodoController@list');
+$router->post('/api/todos/create', 'TodoController@create');
+$router->post('/api/todos/update', 'TodoController@update');
+$router->post('/api/todos/delete', 'TodoController@delete');
+$router->post('/api/todos/reset_pinned', 'TodoController@resetPinned');
+
 // Dashboard & Analytics
 $router->get('/api/dashboard/charts', 'DashboardController@getChartData');
 $router->get('/api/dashboard/priority-tasks', 'DashboardController@getPriorityTasks');
@@ -51,3 +58,9 @@ $router->get('/api/leaves/list', 'LeaveController@getList');
 $router->post('/api/leaves/submit', 'LeaveController@submitRequest');
 $router->post('/api/leaves/update-status', 'LeaveController@updateStatus');
 $router->post('/api/leaves/cancel', 'LeaveController@cancelRequest');
+
+// Publishing Report Management
+$router->get('/api/publishing/fetch-report', 'PublishingController@fetchReport');
+$router->post('/api/publishing/save-report', 'PublishingController@saveReport');
+$router->post('/api/publishing/delete-row', 'PublishingController@deleteRow');
+$router->post('/api/publishing/create-month', 'PublishingController@createMonth');
