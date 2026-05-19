@@ -1,8 +1,8 @@
 -- Taskly: Task Management & Performance SaaS Database Schema
 -- Last Updated: 2026-05-14
 
-CREATE DATABASE IF NOT EXISTS deckoid_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE deckoid_task_management;
+-- CREATE DATABASE IF NOT EXISTS deckoid_task_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE deckoid_task_management;
 
 -- 1. Roles Table (Departments/Modules)
 CREATE TABLE IF NOT EXISTS roles (
@@ -291,7 +291,7 @@ INSERT IGNORE INTO roles (id, name, slug) VALUES
 ('ce41eb64-5059-11f1-8ccd-309c2374f21d', 'Marketing Manager', 'marketing_manager'),
 ('4b1d3e2f-5e6a-4b7c-8d9e-0f1a2b3c4d5e', 'AI Products', 'ai_products');
 
--- Seed Super Admin User (Default Password: 1234)
+-- Seed Super Admin User (Default Password: admin123)
 -- Note: Replace password_hash with a secure bcrypt hash in production.
 INSERT IGNORE INTO users (id, role_id, role, full_name, username, email, password_hash, status) VALUES 
-('e3e3e3e3-e3e3-4e3e-a3e3-e3e3e3e3e3e3', '6f9e836b-67a4-4770-96f1-67e39a5f4581', 'admin', 'Super Admin', 'admin', 'admin@gmail.com', '$2y$10$wOTOd2Oyot/MX4GCAIQm7uIc/BsKb6w81/e20SK.CDLoYzjQRIdny', 'active');
+('e3e3e3e3-e3e3-4e3e-a3e3-e3e3e3e3e3e3', '6f9e836b-67a4-4770-96f1-67e39a5f4581', 'admin', 'Super Admin', 'admin', 'admin@gmail.com', '$2y$10$GuYSBdm8xixAW9NF1MrxSuevJe55AHOiQ5K2QM3wQKkgkA1yK2ohi', 'active');
