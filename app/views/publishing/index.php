@@ -205,11 +205,11 @@ $(document).ready(function() {
             // Header (Generic top headers)
             const $thead = $('<thead>').addClass('bg-neutral-50');
             const $headerRow = $('<tr>');
-            $headerRow.append('<th class="ps-4" style="min-width: 200px; width: 200px;">Title</th>');
+            $headerRow.append('<th class="ps-4 sticky-col" style="min-width: 250px; width: 250px;">Title</th>');
             $headerRow.append(`<th colspan="16" class="text-center">Publishing Days</th>`);
             if (isAdmin) {
-                $headerRow.append('<th class="text-center" style="width: 150px;">Assignment</th>');
-                $headerRow.append('<th class="text-center" style="width: 80px;">Actions</th>');
+                $headerRow.append('<th class="text-center" style="min-width: 250px; width: 250px;">Assignment</th>');
+                $headerRow.append('<th class="text-center" style="min-width: 80px; width: 80px;">Actions</th>');
             }
             $thead.append($headerRow);
             $table.append($thead);
@@ -227,7 +227,7 @@ $(document).ready(function() {
                     const $tr1 = $('<tr>');
                     
                     // Title (rowspan=4)
-                    const $titleTd = $('<td>').addClass('ps-4').attr('rowspan', 4);
+                    const $titleTd = $('<td>').addClass('ps-4 sticky-col').attr('rowspan', 4);
                     if (isAdmin) {
                         const $input = $('<input>').addClass('form-control form-control-sm title-input')
                             .val(row.title)
@@ -246,9 +246,6 @@ $(document).ready(function() {
                     }
                     // 16th column blank header
                     $tr1.append(`<th class="bg-neutral-50" style="width: 60px;"></th>`);
-
-                    // 16th column in Row 1 (blank)
-                    $tr1.append($('<td>').addClass('bg-neutral-50/50'));
 
                     if (isAdmin) {
                         // Assignment (rowspan=4)
@@ -582,15 +579,15 @@ $(document).ready(function() {
     opacity: 1 !important;
 }
 
-.table th:first-child, .table td:first-child {
+.sticky-col {
     position: sticky;
     left: 0;
     background-color: #FFFFFF !important;
-    z-index: 2;
+    z-index: 10;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05);
 }
 
-.table thead th:first-child {
-    z-index: 3;
+thead .sticky-col {
+    z-index: 11;
 }
 </style>
